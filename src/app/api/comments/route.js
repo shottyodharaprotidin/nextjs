@@ -1,3 +1,7 @@
+export async function GET(request) {
+  return new Response(JSON.stringify({ message: 'Comments API endpoint. Use POST to create comments.' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
