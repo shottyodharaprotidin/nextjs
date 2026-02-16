@@ -388,7 +388,7 @@ const EPaperViewer = () => {
                                 <Icons.News />
                             </div>
                             <div>
-                                <h5 className="epaper-title mb-0 fw-bold ls-1 text-uppercase">iNews ePaper</h5>
+                                <h5 className="epaper-title mb-0 fw-bold ls-1 text-uppercase">{language === 'bn' ? 'সত্যধারা ই-পেপার' : 'Shottyodhara ePaper'}</h5>
                                 <small className="epaper-subtitle text-muted d-block" style={{ fontSize: '11px' }}>Digital Edition</small>
                             </div>
                         </div>

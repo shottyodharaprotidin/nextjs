@@ -76,7 +76,7 @@ export default function RootLayout({ children, params }) {
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('inews-theme');
+                  var theme = localStorage.getItem('shottyodhara-theme');
                   if (theme === 'skin-dark') {
                     document.documentElement.setAttribute('data-theme', 'skin-dark');
                   }

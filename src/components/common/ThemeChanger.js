@@ -7,7 +7,7 @@ const ThemeChanger = () => {
 
   useEffect(() => {
     setMounted(true);
-    const storedTheme = localStorage.getItem('inews-theme') || 'light';
+    const storedTheme = localStorage.getItem('shottyodhara-theme') || 'light';
     setTheme(storedTheme);
     document.documentElement.setAttribute('data-theme', storedTheme === 'skin-dark' ? 'skin-dark' : 'light');
   }, []);
@@ -17,7 +17,7 @@ const ThemeChanger = () => {
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'skin-dark' : 'light';
     setTheme(newTheme);
-    localStorage.setItem('inews-theme', newTheme);
+    localStorage.setItem('shottyodhara-theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme === 'skin-dark' ? 'skin-dark' : 'light');
   };
 

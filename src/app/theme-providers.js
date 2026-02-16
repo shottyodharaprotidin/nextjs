@@ -7,7 +7,7 @@ const Providers = ({children}) => {
       attribute="data-theme" 
       defaultTheme="light"
       enableSystem={false}
-      storageKey="inews-theme"
+      storageKey="shottyodhara-theme"
     >
       {children}
     </ThemeProvider>
