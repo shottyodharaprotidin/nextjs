@@ -16,6 +16,7 @@ const t = {
     submitting: 'প্রকাশ হচ্ছে...',
     success: 'আপনার মন্তব্য সফলভাবে প্রকাশিত হয়েছে!',
     error: 'মন্তব্য প্রকাশ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
+    permissionError: 'মন্তব্য প্রকাশ করা নিষিদ্ধ — অনুগ্রহ করে সার্ভারে Public role-এ create অনুমতি চালু করুন অথবা API token ব্যবহার করুন।',
     leaveComment: 'আপনার মন্তব্য দিন',
   },
   en: {
@@ -28,11 +29,12 @@ const t = {
     submitting: 'Posting...',
     success: 'Your comment has been posted successfully!',
     error: 'Failed to post comment. Please try again.',
+    permissionError: 'Posting is disabled — enable Public create permission in Strapi or use an API token.',
     leaveComment: 'Leave a comment',
   },
 };
 
-const Comments = ({ articleSlug, articleDocumentId }) => {
+const Comments = ({ articleSlug, articleId }) => {
   const { language } = useLanguage();
   const labels = t[language] || t.bn;
 
@@ -78,13 +80,14 @@ const Comments = ({ articleSlug, articleDocumentId }) => {
         }
       }
 
-      await createComment(articleDocumentId, authorName.trim(), authorEmail.trim(), content.trim());
+      await createComment(articleId, authorName.trim(), authorEmail.trim(), content.trim());
       setFlash({ type: 'success', msg: labels.success });
       setContent('');
       const res = await getCommentsByArticle(articleSlug);
       setComments(res?.data || []);
-    } catch {
-      setFlash({ type: 'error', msg: labels.error });
+    } catch (err) {
+      const isForbidden = err?.status === 403 || (err?.message && err.message.includes('403'));
+      setFlash({ type: 'error', msg: isForbidden ? labels.permissionError : labels.error });
     } finally {
       setSubmitting(false);
     }

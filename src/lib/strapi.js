@@ -25,12 +25,23 @@ export async function fetchAPI(path, options = {}) {
   
   try {
     const response = await fetch(requestUrl, mergedOptions);
-    
+
     if (!response.ok) {
-      console.error(`Strapi API Error: ${response.status} ${response.statusText}`);
-      throw new Error(`Failed to fetch from Strapi: ${response.statusText}`);
+      // try to include server error body if available
+      let errorBody = null;
+      try {
+        errorBody = await response.json();
+      } catch (e) {
+        /* no JSON body */
+      }
+
+      const err = new Error(`Strapi API Error ${response.status}: ${response.statusText}`);
+      err.status = response.status;
+      err.body = errorBody;
+      console.error('Strapi API Error:', response.status, response.statusText, errorBody);
+      throw err;
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
