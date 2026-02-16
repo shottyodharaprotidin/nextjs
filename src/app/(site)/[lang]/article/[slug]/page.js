@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic';
 
 const ArticleDetailPage = () => {
   const params = useParams();
-  const { language } = useLanguage();
+  const { language, translateNumber } = useLanguage();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -205,9 +205,21 @@ const ArticleDetailPage = () => {
     </div>
   );
 
+  // Derived social media data
+  const socialData = {
+    fb: globalSettings?.socialFacebookFans || 0,
+    twitter: globalSettings?.socialTwitterFollowers || 0,
+    youtube: globalSettings?.socialYoutubeSubscribers || 0,
+  };
+
+  const socialLinks = {
+    fb: globalSettings?.socialFacebookUrl || '#',
+    twitter: globalSettings?.socialTwitterUrl || '#',
+    youtube: globalSettings?.socialYoutubeUrl || '#',
+  };
+
   return (
     <>
-      {/* *** START PAGE MAIN CONTENT *** */}
       <main className="page_main_wrapper">
         <div className="container">
           <div className="row row-m">
@@ -362,23 +374,23 @@ const ArticleDetailPage = () => {
                   <div className="social-media-inner mb-4">
                     <ul className="g-1 row social-media">
                       <li className="col-4">
-                        <Link href="#" className="fb">
+                        <Link href={socialLinks.fb} className="fb" target="_blank">
                           <i className="fab fa-facebook-f" />
-                          <div>3,794</div>
+                          <div>{translateNumber(socialData.fb.toLocaleString())}</div>
                           <p>{currentT.fans}</p>
                         </Link>
                       </li>
                       <li className="col-4">
-                        <Link href="#" className="twitter">
+                        <Link href={socialLinks.twitter} className="twitter" target="_blank">
                           <i className="fab fa-twitter" />
-                          <div>1,562</div>
+                          <div>{translateNumber(socialData.twitter.toLocaleString())}</div>
                           <p>{currentT.followers}</p>
                         </Link>
                       </li>
                       <li className="col-4">
-                        <Link href="#" className="you_tube">
+                        <Link href={socialLinks.youtube} className="you_tube" target="_blank">
                           <i className="fab fa-youtube" />
-                          <div>7,820</div>
+                          <div>{translateNumber(socialData.youtube.toLocaleString())}</div>
                           <p>{currentT.subscribers}</p>
                         </Link>
                       </li>
