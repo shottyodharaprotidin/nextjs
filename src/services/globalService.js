@@ -1,17 +1,20 @@
 
-import { fetchAPI } from '@/lib/strapi';
+import { fetchAPI, getStrapiLocale } from '@/lib/strapi';
 
 export async function getGlobalSettings(locale = 'bn') {
-  return fetchAPI(`/global?populate=*&locale=${locale}`);
+  const strapiLocale = getStrapiLocale(locale);
+  return fetchAPI(`/global?populate=*&locale=${strapiLocale}`);
 }
 
 export async function getAuthors(locale = 'bn') {
-  return fetchAPI(`/authors?populate=*&locale=${locale}`);
+  const strapiLocale = getStrapiLocale(locale);
+  return fetchAPI(`/authors?populate=*&locale=${strapiLocale}`);
 }
 
 export async function getTrendingCategories(limit = 5, locale = 'bn') {
+  const strapiLocale = getStrapiLocale(locale);
   try {
-      return await fetchAPI(`/categories?populate=*&filters[isTrending][$eq]=true&pagination[limit]=${limit}&locale=${locale}`);
+      return await fetchAPI(`/categories?populate=*&filters[isTrending][$eq]=true&pagination[limit]=${limit}&locale=${strapiLocale}`);
   } catch (e) {
       console.warn("getTrendingCategories failed. Returning empty.", e);
       return { data: [] };

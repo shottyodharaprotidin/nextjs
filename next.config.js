@@ -26,6 +26,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'shottyodharaprotidin-media.s3.ap-southeast-2.amazonaws.com',
       }
     ],
   },

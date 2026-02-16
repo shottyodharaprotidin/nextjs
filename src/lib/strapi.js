@@ -62,6 +62,14 @@ export function getStrapiMedia(media) {
   return fallback;
 }
 
+export function getStrapiLocale(locale) {
+  const mapping = {
+    'bn': 'bn-BD',
+    'en': 'en'
+  };
+  return mapping[locale] || locale;
+}
+
 /**
  * Format Strapi date to readable format
  * Supports 'bn' (Bengali) and 'en' (English)
