@@ -1,63 +1,4 @@
 
-/* Bootstrap is imported in layout.js */
-
-
-/*------------------------------------------------------------------------------
-[Master Stylesheet]
-
-Project:        Inews - Modern Responsive Newspaper Template
-Version:        3.1
-Last change:    08/20/2023
-Primary use:    Newspaper & blog
-Author:         easital_tech
-URL:            https://themeforest.net/user/easital_tech
-------------------------------------------------------------------------------*/
-
-
-/*
-This file contains the common info of this theme.
-*/
-
-/*------------------------------------------------------------------------------
-[Table of contents]
-
-    01.  General Styling & Typography
-    02.  Top Header
-    03.  Navbar
-    04.  News Ticker
-    05.  Slider
-    06.  All Post
-    07.  Weather Widget
-    08.  Weather Widget (Two)
-    09.  Social Icon
-    10.  Tabs
-    11.  Games News
-    12.  Categories Widgets
-    13.  Achive Widget (Calender)
-    14.  Poll Widget
-    15.  Tags Widget
-    16.  Featured News
-    17.  Youtube
-    18.  More News
-    19.  Post Card News
-    20.  Article
-    21.  Pagination
-    22.  Footer
-    23.  Category page
-    24.  Contact Page
-    25.  Details page
-    26.  Category Style One
-    27.  Home Style Two
-    28.  About us page
-    29.  F.A.Q us page
-    30.  Utilities
-    31.  Dark skin
-    32.  Layout RTL
-* --------------------------------------------------------------------------- */
-
-
-/*** 01. General Styling & Typography
-------------------------------------------------------------------------------*/
 :root,
 [data-bs-theme=light] {
     --bs-body-color: #777;
@@ -101,6 +42,7 @@ Creation date: 08/11/2016 18:15
         url("/assets/fonts/Flaticon.svg#Flaticon") format("svg");
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
@@ -274,18 +216,23 @@ a:hover {
     padding-left: 5px;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
 a {
     color: #111;
+    text-decoration: none;
 }
 
-a {
-    text-decoration: none;
+[data-theme=skin-dark] a {
+    color: #eee;
+}
+
+.editor-name, .date-text, .authar-info li {
+    color: #444;
+}
+
+[data-theme=skin-dark] .editor-name, 
+[data-theme=skin-dark] .date-text, 
+[data-theme=skin-dark] .authar-info li {
+    color: #bbb;
 }
 
 .featured-inner,
@@ -4202,6 +4149,15 @@ abbr[title] {
     color: #fff;
 }
 
+/* Sidebar override for footer-news-grid when used in white background sidebar */
+.rightSidebar .footer-news-grid .title {
+    color: #111;
+}
+
+[data-theme=skin-dark] .rightSidebar .footer-news-grid .title {
+    color: #fff;
+}
+
 .footer-news-grid .news-list-item {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -5535,9 +5491,48 @@ body {
 /*** 31. Dark skin
 ------------------------------------------------------------------------------*/
 /*common style*/
-:root[data-theme=skin-dark], [data-bs-theme=light] {
+:root[data-theme=skin-dark], [data-bs-theme=dark] {
     --bs-body-color: #aaa;
     --bs-body-bg: #141414;
+}
+
+html[data-theme='skin-dark'] {
+    background-color: #141414;
+}
+
+html[data-theme='skin-dark'] body {
+    background-color: #141414;
+    --bs-body-bg: #141414;
+}
+
+/* Fix for Blue Flash from Calendar Today Tile */
+[data-theme=skin-dark] .react-calendar__tile--now {
+    background: #333 !important;
+    color: #fff !important;
+}
+
+/* Neutralizing Skeleton Loader for smoother Transitions */
+[data-theme=skin-dark] .skeleton-loader {
+    background-color: #2a2a2a;
+    background-image: linear-gradient(
+        90deg,
+        #2a2a2a 0px,
+        #333 40px,
+        #2a2a2a 80px
+    );
+}
+
+/* Logo Theme Switcher - Instant CSS results */
+.logo-dark-img {
+    display: none !important;
+}
+
+[data-theme='skin-dark'] .logo-light-img {
+    display: none !important;
+}
+
+[data-theme='skin-dark'] .logo-dark-img {
+    display: block !important;
 }
 
 
@@ -7398,4 +7393,26 @@ small.author {
     .custom-navbar .navbar-nav {
         justify-content: center !important; /* Center items on desktop if they fit */
     }
+}
+[data-theme='skin-dark'] .special-reports-section {
+    background-color: #222327;
+}
+
+[data-theme='skin-dark'] .empty-state-box {
+    background-color: #222327;
+    border-radius: 8px;
+}
+
+[data-theme='skin-dark'] .text-muted {
+    color: #aeaeae !important;
+}
+
+/* Light mode defaults if needed, usually handled by bootstrap or global */
+.special-reports-section {
+    background-color: #f8f9fa; /* matches bg-light */
+}
+
+.empty-state-box {
+    background-color: #f8f9fa;
+    border-radius: 8px;
 }

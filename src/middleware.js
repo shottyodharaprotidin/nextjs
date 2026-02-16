@@ -25,10 +25,9 @@ export function middleware(request) {
 
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {
-    const locale = getLocale(request);
+    // Force 'bn' as default locale
+    const locale = defaultLocale;
     
-    // e.g. incoming request is /products
-    // The new URL is now /en-US/products
     return NextResponse.redirect(
       new URL(
         `/${locale}${pathname.startsWith("/") ? "" : "/"}${pathname}`,
@@ -40,9 +39,7 @@ export function middleware(request) {
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next)
-    '/((?!_next|assets|favicon.ico).*)',
-    // Optional: only run on root (/)
-    // '/'
+    // Skip all internal paths (_next), static assets, and common file extensions
+    '/((?!_next|assets|favicon\\.ico|.*\\.(?:jpg|jpeg|png|gif|svg|webp|ico|webmanifest)).*)',
   ],
 };

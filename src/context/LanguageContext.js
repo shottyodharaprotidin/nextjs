@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
+import { translateNumber as translateNumberUtils } from '@/lib/language';
 
 const LanguageContext = createContext();
 
@@ -32,12 +33,7 @@ export const LanguageProvider = ({ children, initialLang }) => {
     };
 
     const translateNumber = (num) => {
-        if (language !== 'bn') return num;
-        const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-        return num.toString().split('').map(digit => {
-            const d = parseInt(digit);
-            return isNaN(d) ? digit : bengaliDigits[d];
-        }).join('');
+        return translateNumberUtils(num, language);
     };
 
     const value = {

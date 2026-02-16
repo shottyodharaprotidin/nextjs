@@ -16,16 +16,17 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'app.shottyodharaprotidin.com',
       },
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      }
     ],
   },
   
