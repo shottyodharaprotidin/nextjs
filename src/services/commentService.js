@@ -18,37 +18,26 @@ export async function getCommentsByArticle(articleSlug) {
 
 export async function createComment(articleIdOrDocumentId, authorName, authorEmail, content) {
   try {
-    // Ensure we send a numeric article id to Strapi relation. If caller passed a
-    // documentId (string), resolve it to the numeric id first.
-    let articleId = articleIdOrDocumentId;
-
-    // If it's a non-numeric string, look up the article by documentId
-    if (typeof articleIdOrDocumentId === 'string' && !/^[0-9]+$/.test(articleIdOrDocumentId)) {
-      const lookup = await fetchAPI(`/articles?filters[documentId][$eq]=${encodeURIComponent(articleIdOrDocumentId)}&fields=id`);
-      const found = lookup?.data?.[0];
-      if (!found) {
-        throw new Error('Article not found for provided documentId');
-      }
-      articleId = found.id;
-    }
-
-    // Coerce to number when possible
-    articleId = Number(articleId);
-    if (!articleId || Number.isNaN(articleId)) {
-      throw new Error('Invalid article id provided to createComment');
-    }
-
-    return await fetchAPI('/comments', {
+    const res = await fetch('/api/comments', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        data: {
-          content,
-          authorName,
-          authorEmail: authorEmail || null,
-          article: articleId,
-        },
+        article: articleIdOrDocumentId,
+        authorName,
+        authorEmail: authorEmail || null,
+        content,
       }),
     });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null);
+      const err = new Error('Failed to post comment');
+      err.status = res.status;
+      err.body = errBody;
+      throw err;
+    }
+
+    return await res.json();
   } catch (error) {
     console.error('createComment failed:', error);
     throw error;
