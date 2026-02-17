@@ -1,4 +1,62 @@
 
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/*------------------------------------------------------------------------------
+[Master Stylesheet]
+
+Project:        Inews - Modern Responsive Newspaper Template
+Version:        3.1
+Last change:    08/20/2023
+Primary use:    Newspaper & blog
+Author:         easital_tech
+URL:            https://themeforest.net/user/easital_tech
+------------------------------------------------------------------------------*/
+
+
+/*
+This file contains the common info of this theme.
+*/
+
+/*------------------------------------------------------------------------------
+[Table of contents]
+
+    01.  General Styling & Typography
+    02.  Top Header
+    03.  Navbar
+    04.  News Ticker
+    05.  Slider
+    06.  All Post
+    07.  Weather Widget
+    08.  Weather Widget (Two)
+    09.  Social Icon
+    10.  Tabs
+    11.  Games News
+    12.  Categories Widgets
+    13.  Achive Widget (Calender)
+    14.  Poll Widget
+    15.  Tags Widget
+    16.  Featured News
+    17.  Youtube
+    18.  More News
+    19.  Post Card News
+    20.  Article
+    21.  Pagination
+    22.  Footer
+    23.  Category page
+    24.  Contact Page
+    25.  Details page
+    26.  Category Style One
+    27.  Home Style Two
+    28.  About us page
+    29.  F.A.Q us page
+    30.  Utilities
+    31.  Dark skin
+    32.  Layout RTL
+* --------------------------------------------------------------------------- */
+
+
+/*** 01. General Styling & Typography
+------------------------------------------------------------------------------*/
 :root,
 [data-bs-theme=light] {
     --bs-body-color: #777;
@@ -9,8 +67,7 @@
     --bs-border-radius: 0;
     --bs-emphasis-color-rgb: 235, 2, 84;
     --font-source-sans: __variable_2b53ae;
-    --font-bengali: __variable_bengali;
-    --bs-font-sans-serif: var(--font-bengali), var(--font-source-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --bs-font-sans-serif: var(--font-source-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 ::-webkit-selection {
@@ -42,7 +99,6 @@ Creation date: 08/11/2016 18:15
         url("/assets/fonts/Flaticon.svg#Flaticon") format("svg");
     font-weight: normal;
     font-style: normal;
-    font-display: swap;
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
@@ -145,42 +201,22 @@ a:hover {
     margin: 0 !important;
 }
 
-.container {
-    width: 100%;
-    margin-right: auto;
-    margin-left: auto;
-}
-
 @media (max-width: 767px) {
     .container {
         width: 100%;
         max-width: 100%;
-        padding-right: 15px;
-        padding-left: 15px;
     }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
     .container {
         max-width: 750px;
-        padding-right: 15px;
-        padding-left: 15px;
-    }
-}
-
-@media (min-width: 992px) and (max-width: 1199px) {
-    .container {
-        max-width: 970px;
-        padding-right: 15px;
-        padding-left: 15px;
     }
 }
 
 @media (min-width: 1200px) {
     .container {
         max-width: 1070px;
-        padding-right: 15px;
-        padding-left: 15px;
     }
 
     .home-nine .container {
@@ -216,23 +252,18 @@ a:hover {
     padding-left: 5px;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 a {
     color: #111;
+}
+
+a {
     text-decoration: none;
-}
-
-[data-theme=skin-dark] a {
-    color: #eee;
-}
-
-.editor-name, .date-text, .authar-info li {
-    color: #444;
-}
-
-[data-theme=skin-dark] .editor-name, 
-[data-theme=skin-dark] .date-text, 
-[data-theme=skin-dark] .authar-info li {
-    color: #bbb;
 }
 
 .featured-inner,
@@ -578,11 +609,6 @@ article:hover figure a:before,
     position: relative;
 }
 
-.sidebar-sticky {
-    position: sticky;
-    top: 80px;
-}
-
 @media(min-width: 768px){
     .home-seven .rightSidebar {
         padding-left: 35px;
@@ -685,7 +711,7 @@ article:hover figure a:before,
 }
 
 .header-logo img {
-    height: auto;
+    height: 56px;
 }
 
 /*** 03. Navbar
@@ -1204,7 +1230,7 @@ article:hover figure a:before,
 
 #fullscreen-searchform {
     position: relative;
-    vertical-align: middle;
+    verticle-align: middle;
     max-width: 800px;
     margin: auto;
 }
@@ -1227,7 +1253,7 @@ article:hover figure a:before,
 }
 
 .fullscreen-search-overlay #fullscreen-search-wrapper #fullscreen-searchform #fullscreen-search-input:focus {
-    border: none;
+    boder: none;
     outline: none;
 }
 
@@ -1476,29 +1502,6 @@ nav.navbar.custom-navbar .dropdown-menu.megamenu-content .col-menu-video:first-c
 .slider-inner {
     position: relative;
     margin-bottom: 48px;
-    contain: layout style;
-}
-
-.home-nine .slider-inner {
-    min-height: 390px;
-}
-
-@media (min-width: 768px) {
-    .home-nine .slider-inner {
-        min-height: 482px;
-    }
-}
-
-@media (min-width: 992px) {
-    .home-nine .slider-inner {
-        min-height: 642px;
-    }
-}
-
-.slider-inner > .container-fluid > .row {
-    max-width: 1400px;
-    margin-left: auto !important;
-    margin-right: auto !important;
 }
 
 #owl-slider .item img {
@@ -1699,20 +1702,6 @@ figure img {
     }
 }
 
-
-.skeleton-post-height-1 { height: 390px; }
-.skeleton-post-height-2 { height: 150px; }
-
-@media(min-width: 768px) {
-  .skeleton-post-height-1 { height: 482px; }
-  .skeleton-post-height-2 { height: 240px; }
-}
-
-@media(min-width: 992px) {
-  .skeleton-post-height-1 { height: 642px; }
-  .skeleton-post-height-2 { height: 320px; }
-}
-
 .news-content {
     position: absolute;
     z-index: 10;
@@ -1742,7 +1731,7 @@ figure img {
     font-size: 12px;
     margin-bottom: 7px;
     padding: 0px 8px;
-    background-color: #bf0244;
+    background-color: #eb0254;
     letter-spacing: 0.5px;
     line-height: 18px;
     text-transform: uppercase;
@@ -4149,15 +4138,6 @@ abbr[title] {
     color: #fff;
 }
 
-/* Sidebar override for footer-news-grid when used in white background sidebar */
-.rightSidebar .footer-news-grid .title {
-    color: #111;
-}
-
-[data-theme=skin-dark] .rightSidebar .footer-news-grid .title {
-    color: #fff;
-}
-
 .footer-news-grid .news-list-item {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -5230,36 +5210,8 @@ blockquote.no-sign p {
     color: #2f2e41;
 }
 
-/* Logo Visibility Logic */
 .header-logo_white {
     display: none;
-}
-
-.header-logo_dark {
-    display: block;
-}
-
-[data-theme="skin-dark"] .header-logo_dark {
-    display: none;
-}
-
-[data-theme="skin-dark"] .header-logo_white {
-    display: block;
-}
-
-/* Smooth theme transition - only for backgrounds and colors, not layout */
-:root {
-    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-}
-
-/* Prevent layout shift during load */
-html {
-    overflow-x: hidden;
-}
-
-body {
-    min-height: 100vh;
-    overflow-x: hidden;
 }
 
 /* Language dropdown ------------- */
@@ -5491,48 +5443,9 @@ body {
 /*** 31. Dark skin
 ------------------------------------------------------------------------------*/
 /*common style*/
-:root[data-theme=skin-dark], [data-bs-theme=dark] {
+:root[data-theme=skin-dark], [data-bs-theme=light] {
     --bs-body-color: #aaa;
     --bs-body-bg: #141414;
-}
-
-html[data-theme='skin-dark'] {
-    background-color: #141414;
-}
-
-html[data-theme='skin-dark'] body {
-    background-color: #141414;
-    --bs-body-bg: #141414;
-}
-
-/* Fix for Blue Flash from Calendar Today Tile */
-[data-theme=skin-dark] .react-calendar__tile--now {
-    background: #333 !important;
-    color: #fff !important;
-}
-
-/* Neutralizing Skeleton Loader for smoother Transitions */
-[data-theme=skin-dark] .skeleton-loader {
-    background-color: #2a2a2a;
-    background-image: linear-gradient(
-        90deg,
-        #2a2a2a 0px,
-        #333 40px,
-        #2a2a2a 80px
-    );
-}
-
-/* Logo Theme Switcher - Instant CSS results */
-.logo-dark-img {
-    display: none !important;
-}
-
-[data-theme='skin-dark'] .logo-light-img {
-    display: none !important;
-}
-
-[data-theme='skin-dark'] .logo-dark-img {
-    display: block !important;
 }
 
 
@@ -5609,21 +5522,6 @@ html[data-theme='skin-dark'] body {
 [data-theme=skin-dark] h6,
 [data-theme=skin-dark] a {
     color: #fff;
-}
-
-[data-theme=skin-dark] .accordion-button {
-    background-color: #222327;
-    color: #fff;
-}
-
-[data-theme=skin-dark] .accordion-button:not(.collapsed) {
-    background-color: #eb0254;
-    color: #fff;
-}
-
-[data-theme=skin-dark] .accordion-body {
-    background-color: #1a1a1a;
-    color: #aaa;
 }
 
 [data-theme=skin-dark] .featured-inner,
@@ -5757,7 +5655,14 @@ html[data-theme='skin-dark'] body {
     background-color: #141414;
 }
 
-/* header logo logic moved to main block */
+/* header */
+[data-theme=skin-dark] .header-logo_dark {
+    display: none;
+}
+
+[data-theme=skin-dark] .header-logo_white {
+    display: block;
+}
 
 [data-theme=skin-dark] #nav-icon span {
     background: #fff;
@@ -7288,196 +7193,4 @@ body.layout-rtl .style-settings-content {
 }
 body.layout-rtl .style-settings-content ul li select {
     float: left;
-}
-
-/* Skeleton Loader Styles */
-.skeleton-loader {
-  background-color: #e0e0e0;
-  position: relative;
-  overflow: hidden;
-  border-radius: 4px;
-}
-
-.skeleton-loader::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.2) 20%,
-    rgba(255, 255, 255, 0.5) 60%,
-    rgba(255, 255, 255, 0)
-  );
-  animation: shimmer 1.5s infinite;
-  content: '';
-  display: block;
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* Dark mode support */
-[data-theme=skin-dark] .skeleton-loader {
-  background-color: #333;
-}
-[data-theme=skin-dark] .skeleton-loader::after {
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.05) 20%,
-    rgba(255, 255, 255, 0.1) 60%,
-    rgba(255, 255, 255, 0)
-  );
-}
-
-/* Accessibility Fixes */
-img.thumb {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-small.author {
-    color: #555;
-    font-weight: 600;
-}
-
-/* Fix Header Navigation Wrapping */
-/* Fix Header Navigation Wrapping & Enable Horizontal Scroll */
-/* Mobile-specific Header Overrides */
-@media (max-width: 991px) {
-    .custom-navbar .navbar-nav {
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        gap: 15px;
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
-        -ms-overflow-style: none;  /* Hide scrollbar for IE/Edge */
-        justify-content: flex-start !important;
-        padding-top: 5px;
-        padding-bottom: 5px;
-    }
-
-    .custom-navbar .navbar-nav::-webkit-scrollbar {
-        display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
-    }
-
-    .custom-navbar .nav-link {
-        white-space: nowrap;
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        font-size: 14px;
-    }
-
-    .custom-navbar .container {
-        max-width: 100% !important;
-        padding-left: 15px;
-        padding-right: 15px;
-        display: flex; /* Remove !important to allow d-md-none to work */
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center;
-    }
-
-    .navbar-nav-container {
-        flex-grow: 1;
-        overflow: hidden;
-        min-width: 0; /* Important for flex child with overflow */
-    }
-
-    .navbar-brand-mobile img {
-        max-width: 140px;
-        height: auto;
-    }
-
-    /* Padding adjustments for mobile rows */
-    .mobile-header-row {
-        background-color: #fff;
-    }
-
-    [data-theme='skin-dark'] .mobile-header-row {
-        background-color: #1a1b1e;
-        border-bottom-color: #333 !important;
-    }
-
-    /* Burger Icon Styling for Mobile */
-    #nav-icon-mobile {
-        width: 24px;
-        height: 18px;
-        position: relative;
-        transform: rotate(0deg);
-        transition: .5s ease-in-out;
-        cursor: pointer;
-        padding-right: 30px; /* Space for burger */
-    }
-
-    #nav-icon-mobile span {
-        display: block;
-        position: absolute;
-        height: 2px;
-        width: 100%;
-        background: #000;
-        border-radius: 9px;
-        opacity: 1;
-        left: 0;
-        transform: rotate(0deg);
-        transition: .25s ease-in-out;
-    }
-
-    [data-theme='skin-dark'] #nav-icon-mobile span {
-        background: #fff;
-    }
-
-    #nav-icon-mobile span:nth-child(1) { top: 0px; }
-    #nav-icon-mobile span:nth-child(2) { top: 7px; }
-    #nav-icon-mobile span:nth-child(3) { top: 14px; }
-
-    #nav-icon-mobile.open span:nth-child(1) {
-        top: 7px;
-        transform: rotate(135deg);
-    }
-    #nav-icon-mobile.open span:nth-child(2) {
-        opacity: 0;
-        left: -60px;
-    }
-    #nav-icon-mobile.open span:nth-child(3) {
-        top: 7px;
-        transform: rotate(-135deg);
-    }
-}
-
-@media (min-width: 992px) {
-    .custom-navbar .navbar-nav {
-        justify-content: center !important; /* Center items on desktop if they fit */
-    }
-}
-[data-theme='skin-dark'] .special-reports-section {
-    background-color: #222327;
-}
-
-[data-theme='skin-dark'] .empty-state-box {
-    background-color: #222327;
-    border-radius: 8px;
-}
-
-[data-theme='skin-dark'] .text-muted {
-    color: #aeaeae !important;
-}
-
-/* Light mode defaults if needed, usually handled by bootstrap or global */
-.special-reports-section {
-    background-color: #f8f9fa; /* matches bg-light */
-}
-
-.empty-state-box {
-    background-color: #f8f9fa;
-    border-radius: 8px;
 }

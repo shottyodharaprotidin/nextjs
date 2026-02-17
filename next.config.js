@@ -12,31 +12,6 @@ const nextConfig = {
     );
     return config;
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'app.shottyodharaprotidin.com',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ytimg.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'shottyodharaprotidin-media.s3.ap-southeast-2.amazonaws.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'media.shottyodharaprotidin.com',
-      }
-    ],
-  },
   
 };
 
