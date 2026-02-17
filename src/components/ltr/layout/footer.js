@@ -320,7 +320,7 @@ const Footer = () => {
         <div className="container">
           <div className="align-items-center g-1 g-sm-3 row">
             <div className="col text-center text-sm-start">
-              <div className="copy">Copyright@2023 I-News Inc.</div>
+              <div className="copy">স্বত্ব: ©️ ২০২৬ সত্যধারা প্রতিদিন</div>
             </div>
             <div className="col-sm-auto">
               <ul className="footer-nav list-unstyled text-center mb-0">
