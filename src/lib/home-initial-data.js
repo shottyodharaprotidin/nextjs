@@ -8,28 +8,22 @@ import {
   getTechInnovationArticles,
   getEditorChoiceArticles,
   getRecentPostArticles,
-  getRecentReviewArticles,
   getLatestArticles,
+  selectRecentReviewArticles,
 } from "@/services/articleService";
 import { getYoutubeVideos, getActivePoll } from "@/services/mediaService";
 import {
   getGlobalSettings,
   getTags,
-  getCategories,
   getTrendingCategories,
   getSidebarCategories,
   getAdsManagement,
-  getHeaderTop,
-  getMenuItems,
 } from "@/services/globalService";
 import { getWeatherForecast } from "@/services/weatherService";
 import { localizeLocationLabel } from "@/lib/locationLocalization";
-import { getCategoriesWithChildren } from "@/services/categoryService";
-import { getStrapiMedia } from "@/lib/strapi";
-import { getCurrentWeather } from "@/services/weatherService";
-import { formatDate } from "@/lib/strapi";
+import { unstable_cache } from "next/cache";
 
-export async function getHomeInitialData(locale = "bn") {
+const getCachedHomeInitialData = unstable_cache(async (locale = "bn") => {
   try {
     const [
       topSliderRes,
@@ -46,17 +40,10 @@ export async function getHomeInitialData(locale = "bn") {
       techRes,
       editorRes,
       recentPostRes,
-      reviewRes,
-      categoriesRes,
       trendingRes,
       sidebarRes,
       adsRes,
       weatherRes,
-      headerTopRes,
-      headerMenuRes,
-      sidebarMenuRes,
-      categoryTreeRes,
-      headerWeatherRes,
     ] = await Promise.allSettled([
       getTopSliderArticles(10, locale),
       getMiddleSliderArticles(10, locale),
@@ -72,24 +59,16 @@ export async function getHomeInitialData(locale = "bn") {
       getTechInnovationArticles(4, locale),
       getEditorChoiceArticles(5, locale),
       getRecentPostArticles(20, locale),
-      getRecentReviewArticles(7, locale),
-      getCategories(20, locale),
       getTrendingCategories(20, locale),
       getSidebarCategories(20, locale),
       getAdsManagement(),
       getWeatherForecast(undefined, undefined, locale),
-      getHeaderTop(locale),
-      getMenuItems("header", locale),
-      getMenuItems("sidebar", locale),
-      getCategoriesWithChildren(locale),
-      getCurrentWeather(undefined, undefined, locale),
     ]);
 
     const latestFallback = latestRes.value?.data || [];
     const recentPostData = recentPostRes.value?.data;
-    const reviewData = reviewRes.value?.data;
     const initialLatest = recentPostData?.length > 0 ? recentPostData : latestFallback;
-    const initialLatestReviews = reviewData?.length > 0 ? reviewData : (recentPostData?.slice(0, 4) || latestFallback.slice(0, 4));
+    const initialLatestReviews = selectRecentReviewArticles(latestFallback, 7);
 
     let weatherData = {
       currentTemp: null,
@@ -114,16 +93,6 @@ export async function getHomeInitialData(locale = "bn") {
     const globalRaw = globalRes.value?.data || globalRes.value || null;
     const globalData = globalRaw?.attributes || globalRaw;
     const adsRaw = adsRes.value?.data || adsRes.value || null;
-    const headerTopData = headerTopRes.value?.data || headerTopRes.value || null;
-    const headerMenuItems = headerMenuRes.value?.data || [];
-    const headerAttrs = headerMenuRes.value?.attributes || {};
-    const mobileMenuItems = headerAttrs.mobileMenu || [];
-    const headerLogo = headerAttrs.logo ? getStrapiMedia(headerAttrs.logo, null) : null;
-    const sidebarMenuItems = sidebarMenuRes.value?.data || [];
-    const sidebarData = sidebarMenuRes.value?.attributes || null;
-    const categoryTree = categoryTreeRes.value || [];
-    const headerWeather = headerWeatherRes.value || { temp: null, weatherCode: null, icon: "cloudy" };
-    const headerCurrentDate = formatDate(new Date().toISOString(), locale, true);
 
     return {
       locale,
@@ -142,20 +111,10 @@ export async function getHomeInitialData(locale = "bn") {
       editorPicks: editorRes.value?.data || [],
       latestReviews: initialLatestReviews,
       adsData: adsRaw,
-      categories: categoriesRes.value?.data || [],
       trendingCategories: trendingRes.value?.data || [],
       sidebarCategories: sidebarRes.value?.data || [],
       weatherData,
       totalPages: latestRes.value?.meta?.pagination?.pageCount || 1,
-      headerTopData,
-      headerMenuItems,
-      mobileMenuItems,
-      sidebarMenuItems,
-      sidebarData,
-      categoryTree,
-      headerLogo,
-      headerWeather,
-      headerCurrentDate,
       serverTimestamp: Date.now(),
     };
   } catch {
@@ -176,7 +135,6 @@ export async function getHomeInitialData(locale = "bn") {
       editorPicks: [],
       latestReviews: [],
       adsData: null,
-      categories: [],
       trendingCategories: [],
       sidebarCategories: [],
       weatherData: {
@@ -190,15 +148,11 @@ export async function getHomeInitialData(locale = "bn") {
         daily: [],
       },
       totalPages: 1,
-      headerTopData: null,
-      headerMenuItems: [],
-      mobileMenuItems: [],
-      sidebarMenuItems: [],
-      sidebarData: null,
-      categoryTree: [],
-      headerLogo: null,
-      headerWeather: { temp: null, weatherCode: null, icon: "cloudy" },
-      headerCurrentDate: "",
+      serverTimestamp: Date.now(),
     };
   }
+}, ["home-initial-data"], { revalidate: 60 });
+
+export async function getHomeInitialData(locale = "bn") {
+  return getCachedHomeInitialData(locale);
 }

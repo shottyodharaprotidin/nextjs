@@ -3,7 +3,8 @@ const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 const STRAPI_TIMEOUT_MS = Number(process.env.STRAPI_TIMEOUT_MS || 20000);
 
 async function proxyToStrapi(request, { params }) {
-  const pathSegments = params?.path || [];
+  const resolvedParams = await params;
+  const pathSegments = resolvedParams?.path || [];
   const targetUrl = new URL(`${STRAPI_URL}/api/${pathSegments.join('/')}`);
 
   const incomingUrl = new URL(request.url);

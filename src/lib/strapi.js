@@ -1,6 +1,13 @@
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://app.shottyodharaprotidin.com';
 const SERVER_API_TOKEN = process.env.STRAPI_API_TOKEN;
 const DEFAULT_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 8000);
+const DEFAULT_REVALIDATE_SECONDS = Number(process.env.NEXT_PUBLIC_STRAPI_REVALIDATE_SECONDS || 60);
+
+function buildStrapiCacheTags(path) {
+  const normalizedPath = String(path || '').split('?')[0].replace(/^\//, '');
+  const resource = normalizedPath.split('/')[0] || 'root';
+  return ['strapi', `strapi:${resource}`];
+}
 
 /**
  * Helper to make requests to Strapi API
@@ -18,6 +25,9 @@ export async function fetchAPI(path, options = {}) {
     ? `${STRAPI_URL}/api${path}`
     : `/api/strapi${path}`;
 
+  const requestMethod = String(fetchOptions.method || 'GET').toUpperCase();
+  const shouldApplyServerCache = isServer && (requestMethod === 'GET' || requestMethod === 'HEAD') && !fetchOptions.cache && !fetchOptions.next;
+
   const buildRequestOptions = (includeAuth = true) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -32,6 +42,12 @@ export async function fetchAPI(path, options = {}) {
       ...fetchOptions,
       headers,
       signal,
+      ...(shouldApplyServerCache ? {
+        next: {
+          revalidate: DEFAULT_REVALIDATE_SECONDS,
+          tags: buildStrapiCacheTags(path),
+        },
+      } : {}),
     };
   };
   

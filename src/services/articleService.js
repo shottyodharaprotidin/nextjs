@@ -130,7 +130,7 @@ function createSectionFetcher(flagName, defaultLimit = 10) {
         'locale': strapiLocale,
       });
 
-      return await fetchAPI(`/articles?${queryParams}`);
+      return await fetchAPI(`/articles?${queryParams}`, { silent: true });
     } catch (error) {
       return { data: [] };
     }
@@ -147,7 +147,38 @@ export const getPopularNewsArticles = createSectionFetcher('isPopularNews', 10);
 export const getTechInnovationArticles = createSectionFetcher('isTechInnovation', 4);
 export const getEditorChoiceArticles = createSectionFetcher('isEditorsChoice', 5);
 export const getRecentPostArticles = createSectionFetcher('isRecentPost', 20);
-export const getRecentReviewArticles = createSectionFetcher('isRecentReview', 7);
+export function selectRecentReviewArticles(articles = [], limit = 7) {
+  const normalizedArticles = Array.isArray(articles) ? articles : [];
+  const hasReviewFlag = normalizedArticles.some((article) => {
+    const articleData = article?.attributes || article || {};
+    return Object.hasOwn(articleData, 'isRecentReview');
+  });
+
+  if (!hasReviewFlag) {
+    return normalizedArticles.slice(0, limit);
+  }
+
+  return normalizedArticles
+    .filter((article) => {
+      const articleData = article?.attributes || article || {};
+      return articleData.isRecentReview;
+    })
+    .slice(0, limit);
+}
+
+export async function getRecentReviewArticles(limit = 7, locale = 'bn') {
+  try {
+    const response = await getLatestArticles(1, Math.max(limit * 3, limit), locale);
+    const articles = Array.isArray(response?.data) ? response.data : [];
+
+    return {
+      ...response,
+      data: selectRecentReviewArticles(articles, limit),
+    };
+  } catch (error) {
+    return getLatestArticles(1, limit, locale);
+  }
+}
 export const getAboutPageArticles = createSectionFetcher('isAboutPage', 4);
 
 // Keep old names as aliases for backward compatibility

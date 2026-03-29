@@ -55,9 +55,8 @@ export async function getTags(limit = 10, locale = 'bn') {
       'locale': strapiLocale,
     });
 
-    return await fetchAPI(`/tags?${queryParams}`);
-  } catch (error) {
-    console.warn("getTags failed. Returning empty.", error);
+    return await fetchAPI(`/tags?${queryParams}`, { silent: true });
+  } catch {
     return { data: [] };
   }
 }

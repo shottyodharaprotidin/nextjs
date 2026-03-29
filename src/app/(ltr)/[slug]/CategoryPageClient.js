@@ -297,28 +297,49 @@ const CategoryPage = ({ initialData = null, slug = '', page = 1 }) => {
     };
 
     const mainArticles = articles;
-    const hasMainArticles = mainArticles.length > 0;
-    const showMainLoading = loading && !hasMainArticles;
-    const showNoNews = !loading && !hasMainArticles;
     const sliderArticles = (sliderData.length > 0 ? sliderData : mainArticles).slice(0, 5);
     const showSliderSection = sliderArticles.length > 0;
+    const sliderKeys = new Set(sliderArticles.map(getArticleKey).filter(Boolean));
 
     const gridArticles = (() => {
         const baseGrid = Array.isArray(gridData) ? gridData : [];
-        const used = new Set(baseGrid.map(getArticleKey).filter(Boolean));
-        const pool = [...sliderArticles, ...mainArticles].filter((article) => {
+        const used = new Set(sliderKeys);
+        const dedupedBaseGrid = baseGrid.filter((article) => {
             const key = getArticleKey(article);
             if (!key || used.has(key)) return false;
             used.add(key);
             return true;
         });
-        return [...baseGrid, ...pool].slice(0, 4);
+
+        const pool = mainArticles.filter((article) => {
+            const key = getArticleKey(article);
+            if (!key || used.has(key)) return false;
+            used.add(key);
+            return true;
+        });
+
+        return [...dedupedBaseGrid, ...pool].slice(0, 4);
     })();
+
+    const usedHeroKeys = new Set([
+        ...sliderArticles.map(getArticleKey),
+        ...gridArticles.map(getArticleKey),
+    ].filter(Boolean));
+
+    const mainArticlesUnique = mainArticles.filter((article) => {
+        const key = getArticleKey(article);
+        return key ? !usedHeroKeys.has(key) : true;
+    });
+
+    const hasMainArticles = mainArticlesUnique.length > 0;
+    const showMainLoading = loading && !hasMainArticles;
+    const hasAnyVisibleContent = showSliderSection || gridArticles.length > 0 || hasMainArticles;
+    const showNoNews = !loading && !hasAnyVisibleContent;
 
     return (
         <Layout hideMiddleHeader={true} globalSettings={globalSettings}>
             {/* START PAGE TITLE */}
-            <div className="page-title">
+            <div className="page-title article-page-title">
                 <div className="container">
                     <div className="align-items-center row">
                         <div className="col">
@@ -386,7 +407,7 @@ const CategoryPage = ({ initialData = null, slug = '', page = 1 }) => {
                                 <div className="post-inner categoty-style-1">
                                     <div className="post-body">
                                         <div className="row row-m">
-                                            {mainArticles.map((article) => (
+                                            {mainArticlesUnique.map((article) => (
                                                 <div className="col-md-6 col-p" key={article.id}>
                                                     <ArticleCard article={article} categoryName={categoryName} locale={locale} />
                                                 </div>
@@ -414,15 +435,16 @@ const CategoryPage = ({ initialData = null, slug = '', page = 1 }) => {
                         <div className={`col-p rightSidebar article-sidebar-col ${locale === 'bn' ? 'rightSidebar-locale-bn' : ''}`}>
                             <StickyBox offsetTop={100} offsetBottom={20} className="article-sidebar-sticky">
                                 {/* SOCIAL COUNTER */}
-                                <div className="align-items-center d-flex fs-6 justify-content-center mb-1 text-center social-counter-total">
-                                    <i className="fa-solid fa-heart text-primary me-1" /> {t.join}{" "}
-                                    <span className="fw-bold mx-1">
-                                        {globalSettings?.socialTotalFollowers || '0'}
-                                    </span> {t.followers}
-                                </div>
-                                {/* SOCIAL ICONS */}
-                                <div className="social-media-inner mb-2">
-                                    <ul className="g-1 row social-media">
+                                <div className="article-social-card mb-2">
+                                    <div className="align-items-center d-flex fs-6 justify-content-center mb-1 text-center social-counter-total">
+                                        <i className="fa-solid fa-heart text-primary me-1" /> {t.join}{" "}
+                                        <span className="fw-bold mx-1">
+                                            {globalSettings?.socialTotalFollowers || '0'}
+                                        </span> {t.followers}
+                                    </div>
+                                    {/* SOCIAL ICONS */}
+                                    <div className="social-media-inner mb-0">
+                                        <ul className="g-1 row social-media">
                                         <li className="col-4">
                                             <a href={globalSettings?.socialRssUrl || '#'} className="rss" target="_blank" rel="noopener noreferrer">
                                                 <i className="fas fa-rss" />
@@ -465,7 +487,8 @@ const CategoryPage = ({ initialData = null, slug = '', page = 1 }) => {
                                                 <p>{t.followers}</p>
                                             </a>
                                         </li>
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
                                 {/* ADVERTISEMENT */}
                                 <div className="add-inner">

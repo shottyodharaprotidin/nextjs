@@ -7,7 +7,7 @@ import { getStrapiMedia } from "@/lib/strapi";
 import BodyClassCleaner from "@/components/ltr/useEffect-hook/BodyClassCleaner";
 
 export default async function FaqPage() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const locale = cookieStore.get('NEXT_LOCALE')?.value || 'bn';
     const translations = {
         en: {

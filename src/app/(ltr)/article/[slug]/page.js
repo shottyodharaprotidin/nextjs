@@ -8,8 +8,8 @@ import ClientArticleDetail from '@/components/article/article-details';
 export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
-  const { slug } = params;
-  const cookieStore = cookies();
+  const { slug } = await params;
+  const cookieStore = await cookies();
   const locale = cookieStore.get('NEXT_LOCALE')?.value || 'bn';
   let articleData = null;
 
@@ -54,8 +54,9 @@ export async function generateMetadata({ params }) {
 }
 
 const ArticleDetailPage = async ({ params, searchParams }) => {
-  const { slug } = params;
-  const cookieStore = cookies();
+  const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const cookieStore = await cookies();
   const locale = cookieStore.get('NEXT_LOCALE')?.value || 'bn';
 
   // Parallel Data Fetching with Error Handling
@@ -66,11 +67,11 @@ const ArticleDetailPage = async ({ params, searchParams }) => {
   let adsResponse = { data: null };
 
   // Deteksi Draft Mode
-  const { isEnabled } = draftMode();
+  const { isEnabled } = await draftMode();
 
   // When in draft mode, use the locale from URL params (e.g. from preview redirect)
   // because the browser cookie might be in a different language from the article
-  const previewLocale = searchParams?.locale || locale;
+  const previewLocale = resolvedSearchParams?.locale || locale;
   const articleFetcher = isEnabled ? getArticleBySlugPreview : getArticleBySlug;
   const fetchLocale = isEnabled ? previewLocale : locale;
 

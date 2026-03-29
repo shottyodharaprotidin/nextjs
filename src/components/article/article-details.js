@@ -90,7 +90,7 @@ const ClientArticleDetail = ({ article, mostViewed = [], popularNews = [], globa
       {/* *** START PAGE MAIN CONTENT *** */}
       <main className={`page_main_wrapper article-page-wrapper ${locale === 'en' ? 'locale-en' : ''}`}>
         {/* START PAGE TITLE */}
-        <div className="page-title">
+        <div className="page-title article-page-title">
           <div className="container">
             <div className="align-items-center row">
      

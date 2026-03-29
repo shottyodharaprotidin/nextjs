@@ -9,6 +9,7 @@ import { resolveClientLocation } from '@/services/locationService';
 import { getMenuItems, getAdsManagement, getHeaderTop } from '@/services/globalService';
 import { getCategoriesWithChildren } from '@/services/categoryService';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useHeaderData } from '@/lib/HeaderDataContext';
 import ThemeChanger from '../style-selectors/style-selector';
 
 const WiDaySunny = dynamic(() => import('weather-icons-react').then((mod) => mod.WiDaySunny), { ssr: false });
@@ -18,6 +19,95 @@ const WiRain = dynamic(() => import('weather-icons-react').then((mod) => mod.WiR
 const WiSnow = dynamic(() => import('weather-icons-react').then((mod) => mod.WiSnow), { ssr: false });
 const WiThunderstorm = dynamic(() => import('weather-icons-react').then((mod) => mod.WiThunderstorm), { ssr: false });
 const WiFog = dynamic(() => import('weather-icons-react').then((mod) => mod.WiFog), { ssr: false });
+
+const MENU_COMPONENT_SUFFIXES = new Set([
+    'base-link',
+    'menu-button',
+    'dropdown-menu',
+    'dropdown-header',
+    'nested-dropdown',
+    'mega-menu',
+    'video-menu',
+]);
+
+const normalizeMenuComponent = (component) => {
+    if (typeof component !== 'string') {
+        return '';
+    }
+
+    const trimmedComponent = component.trim();
+    const suffix = trimmedComponent.split('.').pop();
+
+    if (suffix && MENU_COMPONENT_SUFFIXES.has(suffix)) {
+        return `navigation.${suffix}`;
+    }
+
+    return trimmedComponent;
+};
+
+const normalizeMenuPath = (value) => {
+    if (typeof value !== 'string') {
+        return value;
+    }
+
+    const trimmedValue = value.trim();
+    if (!trimmedValue || trimmedValue === '#') {
+        return '#';
+    }
+
+    if (/^https?:\/\//i.test(trimmedValue)) {
+        return trimmedValue;
+    }
+
+    return trimmedValue.replace(/\s+/g, '');
+};
+
+const getMenuOpenInNewTab = (item) => Boolean(
+    item?.openInNewTab ?? item?.oopenInNewTab ?? item?.openInNeewTab
+);
+
+const normalizeMenuItem = (item) => {
+    if (!item || typeof item !== 'object') {
+        return item;
+    }
+
+    const data = item.attributes || item;
+    const normalizedItem = {
+        ...data,
+        __component: normalizeMenuComponent(item.__component || data.__component),
+        url: normalizeMenuPath(data.url),
+        slug: normalizeMenuPath(data.slug),
+        openInNewTab: getMenuOpenInNewTab(data),
+    };
+
+    if (Array.isArray(data.subMenus)) {
+        normalizedItem.subMenus = data.subMenus.map(normalizeMenuItem).filter(Boolean);
+    }
+
+    if (Array.isArray(data.sections)) {
+        normalizedItem.sections = data.sections.map((section) => ({
+            ...section,
+            links: Array.isArray(section?.links)
+                ? section.links.map(normalizeMenuItem).filter(Boolean)
+                : [],
+        }));
+    }
+
+    if (Array.isArray(data.videos)) {
+        normalizedItem.videos = data.videos.map((video) => ({
+            ...video,
+            url: normalizeMenuPath(video?.url),
+            slug: normalizeMenuPath(video?.slug),
+            openInNewTab: getMenuOpenInNewTab(video),
+        }));
+    }
+
+    return normalizedItem;
+};
+
+const normalizeMenuCollection = (items) => Array.isArray(items)
+    ? items.map(normalizeMenuItem).filter(Boolean)
+    : [];
 
 // Helper function to get weather icon
 const getWeatherIcon = (iconName) => {
@@ -34,8 +124,18 @@ const getWeatherIcon = (iconName) => {
 };
 
 const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = null }) => {
+    const contextHeaderData = useHeaderData();
+    const seedHeaderData = initialHeaderData || contextHeaderData;
+    const hasServerHeaderSeed = Boolean(
+        seedHeaderData?.headerMenuItems?.length ||
+        seedHeaderData?.mobileMenuItems?.length ||
+        seedHeaderData?.sidebarMenuItems?.length ||
+        seedHeaderData?.categoryTree?.length ||
+        seedHeaderData?.headerTopData
+    );
+
     const { locale } = useLanguage();
-    const [weather, setWeather] = useState(initialHeaderData?.headerWeather || { temp: null, weatherCode: null, icon: 'cloudy' });
+    const [weather, setWeather] = useState(seedHeaderData?.headerWeather || { temp: null, weatherCode: null, icon: 'cloudy' });
     const [isSidebarActive, setSidebarActive] = useState(false);
     const [isOverlayActive, setOverlayActive] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -55,17 +155,17 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
         setOverlayActive(false);
     };
 
-    const [currentDate, setCurrentDate] = useState(initialHeaderData?.headerCurrentDate || '');
-    const [menuItems, setMenuItems] = useState(initialHeaderData?.headerMenuItems || []);
-    const [sidebarMenuItems, setSidebarMenuItems] = useState(initialHeaderData?.sidebarMenuItems || []);
-    const [mobileMenuItems, setMobileMenuItems] = useState(initialHeaderData?.mobileMenuItems || []);
+    const [currentDate, setCurrentDate] = useState(seedHeaderData?.headerCurrentDate || '');
+    const [menuItems, setMenuItems] = useState(seedHeaderData?.headerMenuItems || []);
+    const [sidebarMenuItems, setSidebarMenuItems] = useState(seedHeaderData?.sidebarMenuItems || []);
+    const [mobileMenuItems, setMobileMenuItems] = useState(seedHeaderData?.mobileMenuItems || []);
     const [expandedSidebarItems, setExpandedSidebarItems] = useState({});
-    const [sidebarData, setSidebarData] = useState(initialHeaderData?.sidebarData || null);
-    const [categoryTree, setCategoryTree] = useState(initialHeaderData?.categoryTree || []);
+    const [sidebarData, setSidebarData] = useState(seedHeaderData?.sidebarData || null);
+    const [categoryTree, setCategoryTree] = useState(seedHeaderData?.categoryTree || []);
 
-    const [headerTopData, setHeaderTopData] = useState(initialHeaderData?.headerTopData || null);
+    const [headerTopData, setHeaderTopData] = useState(seedHeaderData?.headerTopData || null);
     const [adsData, setAdsData] = useState(null);
-    const [headerLogo, setHeaderLogo] = useState(initialHeaderData?.headerLogo || null);
+    const [headerLogo, setHeaderLogo] = useState(seedHeaderData?.headerLogo || null);
     const navbarNavRef = useRef(null);
 
     const hasWeatherTemp = weather.temp !== null && weather.temp !== undefined && !Number.isNaN(Number(weather.temp));
@@ -79,12 +179,19 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
         getAdsManagement().then(res => {
             setAdsData(res?.data || res || null);
         });
-        getHeaderTop(locale).then(res => {
-            setHeaderTopData(res?.data || res || null);
-        });
+
+        if (!seedHeaderData?.headerTopData) {
+            getHeaderTop(locale).then(res => {
+                setHeaderTopData(res?.data || res || null);
+            });
+        }
     }, [locale]);
 
     useEffect(() => {
+        if (hasServerHeaderSeed) {
+            return;
+        }
+
         if (typeof window !== 'undefined') {
             try {
                 const cachedHeaderMenu = window.localStorage.getItem(`headerMenu:${locale}`) || window.localStorage.getItem('headerMenu:last');
@@ -151,7 +258,7 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
         };
 
         fetchHeaderWeather();
-    }, [locale]);
+    }, [locale, hasServerHeaderSeed]);
 
     const toggleSidebarSubMenu = (itemId) => {
         setExpandedSidebarItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
@@ -305,8 +412,8 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
     };
 
     const renderMenuItem = (item, index, visibilityClass = "") => {
-        const component = item.__component;
-        const data = item.attributes || item; // Handle both direct component data and relation data
+        const data = normalizeMenuItem(item);
+        const component = data?.__component;
         const isBanglaLocale = locale === 'bn';
         const megaHeadingStyle = isBanglaLocale ? { fontSize: '26px', fontWeight: 300, lineHeight: 1.3 } : undefined;
         const megaItemStyle = isBanglaLocale ? { fontSize: '22px', fontWeight: 300, lineHeight: 1.3 } : undefined;
@@ -348,29 +455,31 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
                     </Link>
                     <ul className="dropdown-menu" aria-labelledby={`dropdown-${index}`}>
                         {subMenus.map((sub, i) => {
-                            const subComponent = sub.__component;
+                            const normalizedSub = normalizeMenuItem(sub);
+                            const subComponent = normalizedSub?.__component;
                             if (subComponent === 'navigation.dropdown-header') {
                                 return (
                                     <li key={i}>
-                                        <h6 className="dropdown-header fw-bold text-dark">{sub.title}</h6>
+                                        <h6 className="dropdown-header fw-bold text-dark">{normalizedSub.title}</h6>
                                     </li>
                                 );
                             }
                             if (subComponent === 'navigation.nested-dropdown') {
-                                const nestedItems = sub.subMenus || [];
+                                const nestedItems = normalizedSub.subMenus || [];
                                 return (
                                     <li className="nav-item dropdown dropend" key={i}>
                                         <Link className="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {sub.title}
+                                            {normalizedSub.title}
                                         </Link>
                                         <ul className="dropdown-menu">
                                             {nestedItems.map((nested, ni) => {
-                                                const nestedSlug = nested.url || '#';
+                                                const normalizedNested = normalizeMenuItem(nested);
+                                                const nestedSlug = normalizedNested.url || normalizedNested.slug || '#';
                                                 const nestedUrl = nestedSlug.startsWith('http') || nestedSlug === '#' ? nestedSlug : (nestedSlug.startsWith('/') ? nestedSlug : `/${nestedSlug}`);
                                                 return (
                                                     <li key={ni}>
-                                                        <Link className="dropdown-item" href={nestedUrl} target={nested.openInNewTab ? "_blank" : "_self"}>
-                                                            {nested.title}
+                                                        <Link className="dropdown-item" href={nestedUrl} target={normalizedNested.openInNewTab ? "_blank" : "_self"}>
+                                                            {normalizedNested.title}
                                                         </Link>
                                                     </li>
                                                 );
@@ -379,12 +488,12 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
                                     </li>
                                 );
                             }
-                            const subSlug = sub.url || '#';
+                            const subSlug = normalizedSub.url || normalizedSub.slug || '#';
                             const subUrl = subSlug.startsWith('http') || subSlug === '#' ? subSlug : (subSlug.startsWith('/') ? subSlug : `/${subSlug}`);
                             return (
                                 <li key={i}>
-                                    <Link className="dropdown-item" href={subUrl} target={sub.openInNewTab ? "_blank" : "_self"}>
-                                        {sub.title}
+                                    <Link className="dropdown-item" href={subUrl} target={normalizedSub.openInNewTab ? "_blank" : "_self"}>
+                                        {normalizedSub.title}
                                     </Link>
                                 </li>
                             );
@@ -570,19 +679,23 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
         return currentDate;
     };
 
+    const normalizedMenuItems = normalizeMenuCollection(menuItems);
+    const normalizedMobileMenuItems = normalizeMenuCollection(mobileMenuItems);
+
     const fallbackMenuItems = categoryTree.slice(0, 10).map((cat) => ({
         title: cat?.name || '',
         url: cat?.slug ? `/${cat.slug}` : '#',
     }));
 
-    const desktopMenuItems = menuItems.length > 0 ? menuItems : fallbackMenuItems;
-    const mobileNavItems = mobileMenuItems.length > 0 ? mobileMenuItems : desktopMenuItems;
+    const desktopMenuItems = normalizedMenuItems.length > 0 ? normalizedMenuItems : fallbackMenuItems;
+    const mobileNavItems = normalizedMobileMenuItems.length > 0 ? normalizedMobileMenuItems : desktopMenuItems;
 
     const normalizeMenuUrl = (slug) => {
-        if (!slug) return '#';
-        return slug.startsWith('http') || slug === '#'
-            ? slug
-            : (slug.startsWith('/') ? slug : `/${slug}`);
+        const normalizedSlug = normalizeMenuPath(slug);
+        if (!normalizedSlug) return '#';
+        return normalizedSlug.startsWith('http') || normalizedSlug === '#'
+            ? normalizedSlug
+            : (normalizedSlug.startsWith('/') ? normalizedSlug : `/${normalizedSlug}`);
     };
 
     const createQuickMenuEntry = (title, slug, openInNewTab, key) => {
@@ -598,8 +711,8 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
     };
 
     const extractDropdownPanelItems = (item, index) => {
-        const component = item.__component;
-        const data = item.attributes || item;
+        const data = normalizeMenuItem(item);
+        const component = data?.__component;
 
         if (component === 'navigation.dropdown-menu') {
             const subMenus = data.subMenus || [];
@@ -669,8 +782,8 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
 
     const mobileQuickMenuItems = mobileNavItems
         .map((item, index) => {
-            const component = item.__component;
-            const data = item.attributes || item;
+            const data = normalizeMenuItem(item);
+            const component = data?.__component;
 
             if (!data?.title || component === 'navigation.menu-button') {
                 return null;
@@ -891,9 +1004,16 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
                         .custom-navbar .dropdown-menu .dropdown-item:focus,
                         .custom-navbar .dropdown-menu .dropdown-item:active,
                         .custom-navbar .dropdown-item.active {
-                            color: #ffffff !important;
+                            color: #eb0254 !important;
                         }
                         .dropdown-menu li:hover > .dropdown-item {
+                            color: #eb0254 !important;
+                        }
+                        [data-theme=skin-dark] .custom-navbar .dropdown-menu .dropdown-item:hover,
+                        [data-theme=skin-dark] .custom-navbar .dropdown-menu .dropdown-item:focus,
+                        [data-theme=skin-dark] .custom-navbar .dropdown-menu .dropdown-item:active,
+                        [data-theme=skin-dark] .custom-navbar .dropdown-item.active,
+                        [data-theme=skin-dark] .dropdown-menu li:hover > .dropdown-item {
                             color: #ffffff !important;
                         }
                     }
@@ -927,8 +1047,10 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
                                     alt="Logo" 
                                     style={{ width: '136px', height: '34px', objectFit: 'contain' }}
                                 />
-                                {locale === 'bn' && (
-                                    <div className="mobile-logo-tagline">সত্যের সাথে, সত্যের পথে</div>
+                                {(locale === 'bn' || locale === 'en') && (
+                                    <div className="mobile-logo-tagline">
+                                        {locale === 'en' ? 'Always in Search of Truth' : 'সত্যের সাথে, সত্যের পথে'}
+                                    </div>
                                 )}
                             </Link>
                             <div className={`date-text-mobile fw-medium ${locale === 'bn' ? 'date-text-bn' : ''}`}>

@@ -2,8 +2,6 @@ import { cookies } from "next/headers";
 import HomePageClient from "./HomePageClient";
 import { getHomeInitialData } from "@/lib/home-initial-data";
 
-export const dynamic = "force-dynamic";
-
 function normalizeLocale(value) {
   return value === "en" ? "en" : "bn";
 }

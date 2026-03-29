@@ -34,6 +34,7 @@ const dictionary = {
     category: "Category",
     recentPost: "Recent Post",
     hotTopics: "Popular Topics",
+    noMenuItems: "No Menu Items",
     copyright: "Copyright: \u00A9 2026 Satyadhara Pratidin",
     links: {
       privacy: "Privacy",
@@ -87,6 +88,7 @@ const dictionary = {
     category: "বিভাগ",
     recentPost: "সাম্প্রতিক পোস্ট",
     hotTopics: "জনপ্রিয় টপিক",
+    noMenuItems: "মেনু আইটেম নেই",
     copyright: "স্বত্ব: \u00A9 ২০২৬ সত্যধারা প্রতিদিন",
     links: {
       privacy: "গোপনীয়তা",
@@ -175,32 +177,45 @@ const Footer = ({ hideMiddleHeader = false }) => {
     const fetchData = async () => {
       try {
         const strapiLocale = getStrapiLocale(locale);
-        const [recentRes, tagRes, footerMenuRes, globalRes] = await Promise.all([
-          getRecentPostArticles(3, locale), // Fetch 3 recent posts (isRecentPost=true)
-          getTags(12, locale), // Fetch 12 tags for hot topics
-          getMenuItems('footer', locale), // Fetch footer menu & attributes
-          getGlobalSettings(locale)
+        const [recentResult, tagsResult, footerMenuResult, globalResult] = await Promise.allSettled([
+          getRecentPostArticles(3, locale),
+          getTags(12, locale),
+          getMenuItems('footer', locale),
+          getGlobalSettings(locale),
         ]);
 
-        let recentPostsData = recentRes?.data || [];
-        // Fallback to 'bn' if 'bn-BD' is empty for articles
+        let recentPostsData = recentResult.status === 'fulfilled'
+          ? (recentResult.value?.data || [])
+          : [];
+
+        // Fallback to 'bn' if 'bn-BD' recent posts are empty.
         if (recentPostsData.length === 0 && strapiLocale === 'bn-BD') {
-          const fallbackRes = await getLatestArticles(1, 3, 'bn');
-          recentPostsData = fallbackRes?.data || [];
+          try {
+            const fallbackRes = await getLatestArticles(1, 3, 'bn');
+            recentPostsData = fallbackRes?.data || [];
+          } catch {
+            recentPostsData = [];
+          }
         }
+
+        const tagRes = tagsResult.status === 'fulfilled' ? tagsResult.value : { data: [] };
+        const footerMenuRes = footerMenuResult.status === 'fulfilled'
+          ? footerMenuResult.value
+          : { data: [], attributes: {} };
+        const globalRes = globalResult.status === 'fulfilled'
+          ? globalResult.value
+          : { data: null };
 
         setRecentPosts(recentPostsData);
         setHotTopics(tagRes?.data || []);
+
         const footerItems = footerMenuRes?.data || [];
         const footerAttrs = footerMenuRes?.attributes || {};
-        
         setFooterMenuItems(footerItems);
         setFooterData(footerAttrs);
-        
+
         const globalRaw = globalRes?.data || globalRes || null;
         setGlobalSettings(globalRaw?.attributes || globalRaw);
-      } catch (error) {
-        console.error("Error fetching footer data:", error);
       } finally {
         setLoading(false);
       }
@@ -224,6 +239,24 @@ const Footer = ({ hideMiddleHeader = false }) => {
   const footerPrimaryText = footerAttrs?.description || t.description || '';
   const hasBanglaFooterText = /[\u0980-\u09FF]/.test(footerPrimaryText);
   const applyBanglaFooterClass = isBanglaLocale || hasBanglaFooterText;
+  const recentPostTitle = footerAttrs?.recentPostTitle || t.recentPost;
+  const noMenuItemsLabel = footerAttrs?.noMenuItemsText || t.noMenuItems;
+  const newsletterMessages = {
+    success: footerAttrs?.newsletterSuccessText || t.newsletter.success,
+    duplicate: footerAttrs?.newsletterDuplicateText || t.newsletter.duplicate,
+    turnstile: footerAttrs?.newsletterTurnstileText || t.newsletter.turnstile,
+    forbidden: footerAttrs?.newsletterForbiddenText || t.newsletter.forbidden,
+    error: footerAttrs?.newsletterErrorText || t.newsletter.error,
+  };
+  const newsletterPrivacyLabel = footerAttrs?.newsletterPrivacyLabel || t.subscribe.privacy;
+  const newsletterFallbackPrefix = footerAttrs?.newsletterTextPrefix || t.subscribe.text;
+  const newsletterFallbackSuffix = footerAttrs?.newsletterTextSuffix || t.subscribe.agree;
+  const socialFallbackLabels = {
+    fb: footerAttrs?.socialFacebookLabel || t.socialLinks.fb,
+    tw: footerAttrs?.socialTwitterLabel || t.socialLinks.tw,
+    yt: footerAttrs?.socialYoutubeLabel || t.socialLinks.yt,
+    ig: footerAttrs?.socialInstagramLabel || t.socialLinks.ig,
+  };
 
   return (
     <>
@@ -263,7 +296,7 @@ const Footer = ({ hideMiddleHeader = false }) => {
                 const result = await subscribeNewsletter(newsletterEmail, 'footer', turnstileToken);
                 if (result.success) {
                   setNewsletterSuccess(true);
-                  setNewsletterMessage(t.newsletter.success);
+                  setNewsletterMessage(newsletterMessages.success);
                   setNewsletterEmail('');
                   // Reset Turnstile
                   if (window.turnstile && turnstileRef.current) {
@@ -272,16 +305,16 @@ const Footer = ({ hideMiddleHeader = false }) => {
                   }
                 } else if (result.error === 'duplicate') {
                   setNewsletterSuccess(false);
-                  setNewsletterMessage(t.newsletter.duplicate);
+                  setNewsletterMessage(newsletterMessages.duplicate);
                 } else if (result.error === 'turnstile') {
                   setNewsletterSuccess(false);
-                  setNewsletterMessage(t.newsletter.turnstile);
+                  setNewsletterMessage(newsletterMessages.turnstile);
                 } else if (result.error === 'forbidden') {
                   setNewsletterSuccess(false);
-                  setNewsletterMessage(t.newsletter.forbidden);
+                  setNewsletterMessage(newsletterMessages.forbidden);
                 } else {
                   setNewsletterSuccess(false);
-                  setNewsletterMessage(t.newsletter.error);
+                  setNewsletterMessage(newsletterMessages.error);
                 }
                 setNewsletterSubmitting(false);
               }}>
@@ -322,7 +355,7 @@ const Footer = ({ hideMiddleHeader = false }) => {
                           <>
                             {parts[0]}
                             <Link href={privacyUrl} className="text-decoration-underline text-primary">
-                              {t.subscribe.privacy}
+                              {newsletterPrivacyLabel}
                             </Link>
                             {parts[1]}
                           </>
@@ -332,11 +365,11 @@ const Footer = ({ hideMiddleHeader = false }) => {
                     }
                     return (
                       <>
-                        {t.subscribe.text}
+                        {newsletterFallbackPrefix}
                         <Link href={privacyUrl} className="text-decoration-underline text-primary ms-1">
-                          {t.subscribe.privacy}
+                          {newsletterPrivacyLabel}
                         </Link>
-                        {t.subscribe.agree}
+                        {newsletterFallbackSuffix}
                       </>
                     );
                   })()}
@@ -354,12 +387,12 @@ const Footer = ({ hideMiddleHeader = false }) => {
             {/* START FOOTER BOX (Address) */}
             <div className="footer-box py-4 footer-address-box">
               <h5 className="wiget-title">{footerAttrs?.editorialName || t.editorial.title}</h5>
-              <div className="text-white footer-editorial" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+              <div className="text-white footer-editorial">
                 <p className="mb-0">{footerAttrs?.editorialOffice || t.editorial.office}</p>
                 <p className="mb-0">{footerAttrs?.editorialAddress1 || t.editorial.address1}</p>
                 <p className="mb-0">{footerAttrs?.editorialAddress2 || t.editorial.address2}</p>
                 <p className="mb-0">{footerAttrs?.editorialPhone || t.editorial.phone}</p>
-                <p className="mb-0" style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{footerAttrs?.editorialEmail || t.editorial.email}</p>
+                <p className="mb-0" style={{ whiteSpace: 'nowrap' }}>{footerAttrs?.editorialEmail || t.editorial.email}</p>
                 <p className="mb-0">{footerAttrs?.editorialEditor || t.editorial.editor}</p>
                 <p className="mb-0">{footerAttrs?.editorialPublisher || t.editorial.publisher}</p>
               </div>
@@ -380,10 +413,10 @@ const Footer = ({ hideMiddleHeader = false }) => {
                         ))
                     ) : (
                         <>
-                            <li><a href={globalSettings?.socialFacebookUrl || "#"} target="_blank" rel="noopener noreferrer">{t.socialLinks.fb}</a></li>
-                            <li><a href={globalSettings?.socialTwitterUrl || "#"} target="_blank" rel="noopener noreferrer">{t.socialLinks.tw}</a></li>
-                            <li><a href={globalSettings?.socialYoutubeUrl || "#"} target="_blank" rel="noopener noreferrer">{t.socialLinks.yt}</a></li>
-                            <li><a href={globalSettings?.socialInstagramUrl || "#"} target="_blank" rel="noopener noreferrer">{t.socialLinks.ig}</a></li>
+                        <li><a href={globalSettings?.socialFacebookUrl || "#"} target="_blank" rel="noopener noreferrer">{socialFallbackLabels.fb}</a></li>
+                        <li><a href={globalSettings?.socialTwitterUrl || "#"} target="_blank" rel="noopener noreferrer">{socialFallbackLabels.tw}</a></li>
+                        <li><a href={globalSettings?.socialYoutubeUrl || "#"} target="_blank" rel="noopener noreferrer">{socialFallbackLabels.yt}</a></li>
+                        <li><a href={globalSettings?.socialInstagramUrl || "#"} target="_blank" rel="noopener noreferrer">{socialFallbackLabels.ig}</a></li>
                         </>
                     )}
                 </ul>
@@ -422,7 +455,7 @@ const Footer = ({ hideMiddleHeader = false }) => {
 
             {/* START FOOTER BOX (Recent Post) */}
             <div className="footer-box py-4 footer-recent-mobile-hide">
-              <h5 className="wiget-title">{t.recentPost}</h5>
+              <h5 className="wiget-title">{recentPostTitle}</h5>
               <div className="footer-news-grid">
                 {recentPosts.map((post, i) => {
                   const p = post.attributes || post;
@@ -488,7 +521,7 @@ const Footer = ({ hideMiddleHeader = false }) => {
                     );
                   })
                 ) : (
-                  <li className="list-inline-item">No Menu Items</li>
+                  <li className="list-inline-item">{noMenuItemsLabel}</li>
                 )}
               </ul>
             </div>

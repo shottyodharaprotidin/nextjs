@@ -7,6 +7,7 @@ import ImportJs from '@/components/ltr/import-js/import-js';
 import Providers from './theme-providers';
 import { getGlobalSettings } from '@/services/globalService';
 import { getStrapiMedia } from '@/lib/strapi';
+import { getHeaderInitialData } from '@/lib/header-initial-data';
 
 export async function generateMetadata() {
   try {
@@ -78,12 +79,13 @@ function normalizeLocale(value) {
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const initialLocale = normalizeLocale(cookieStore.get('NEXT_LOCALE')?.value);
+  const initialHeaderData = await getHeaderInitialData(initialLocale);
 
   return (
     <html lang={initialLocale} data-theme="skin-dark" suppressHydrationWarning>
-      <body className={`locale-${initialLocale}`}>
+      <body className={`locale-${initialLocale}`} suppressHydrationWarning>
         <ImportJs />
-        <Providers initialLocale={initialLocale}>  
+        <Providers initialLocale={initialLocale} initialHeaderData={initialHeaderData}>  
           {children}
         </Providers>
       </body>

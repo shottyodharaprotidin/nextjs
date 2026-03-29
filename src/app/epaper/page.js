@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/app/theme-providers';
 import { getEpapers } from '@/lib/epaper-api';
 import { getStrapiMedia, toBengaliNumber } from '@/lib/strapi';
 import Layout from "@/components/ltr/layout/layout";

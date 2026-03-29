@@ -3,9 +3,7 @@ const nextConfig = {
   reactStrictMode: false,
   output: 'standalone',
   poweredByHeader: false,
-  experimental: {
-    serverComponentsExternalPackages: ['bangla-date-converter'],
-  },
+  serverExternalPackages: ['bangla-date-converter'],
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'app.shottyodharaprotidin.com' },

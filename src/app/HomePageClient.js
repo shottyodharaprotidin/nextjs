@@ -9,9 +9,9 @@ import NewsTicker from "@/components/ltr/news-ticker-carousal/page";
 import useRemoveBodyClass from "@/components/ltr/useEffect-hook/useEffect-hook";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getTopNewsArticles, getHeadlineArticles, getTopSliderArticles, getMiddleSliderArticles, getMostReadArticles, getPopularNewsArticles, getTechInnovationArticles, getEditorChoiceArticles, getRecentPostArticles, getRecentReviewArticles, getLatestArticles } from "@/services/articleService";
+import { getTopNewsArticles, getHeadlineArticles, getTopSliderArticles, getMiddleSliderArticles, getMostReadArticles, getPopularNewsArticles, getTechInnovationArticles, getEditorChoiceArticles, getRecentPostArticles, getLatestArticles, selectRecentReviewArticles } from "@/services/articleService";
 import { getYoutubeVideos, getActivePoll } from "@/services/mediaService";
-import { getGlobalSettings, getTags, getCategories, getTrendingCategories, getSidebarCategories, getAdsManagement } from "@/services/globalService";
+import { getGlobalSettings, getTags, getTrendingCategories, getSidebarCategories, getAdsManagement } from "@/services/globalService";
 import { getWeatherForecast } from "@/services/weatherService";
 import { resolveClientLocation } from "@/services/locationService";
 import { getStrapiMedia, formatDate, toBengaliNumber } from "@/lib/strapi";
@@ -139,7 +139,6 @@ export default function Home({ initialData = null }) {
   const [editorPicks, setEditorPicks] = useState(seed?.editorPicks || []);
   const [latestReviews, setLatestReviews] = useState(seed?.latestReviews || []);
   const [adsData, setAdsData] = useState(seed?.adsData || null);
-  const [categories, setCategories] = useState(seed?.categories || []);
   const [trendingCategories, setTrendingCategories] = useState(seed?.trendingCategories || []);
   const [sidebarCategories, setSidebarCategories] = useState(seed?.sidebarCategories || []);
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -160,20 +159,6 @@ export default function Home({ initialData = null }) {
   const [totalPages, setTotalPages] = useState(seed?.totalPages || 1);
   const [currentPageUrl, setCurrentPageUrl] = useState('');
   const [isRecentFooterLiked, setIsRecentFooterLiked] = useState(false);
-
-  const initialHeaderData = seed
-    ? {
-        headerTopData: seed.headerTopData || null,
-        headerMenuItems: seed.headerMenuItems || [],
-        mobileMenuItems: seed.mobileMenuItems || [],
-        sidebarMenuItems: seed.sidebarMenuItems || [],
-        sidebarData: seed.sidebarData || null,
-        categoryTree: seed.categoryTree || [],
-        headerLogo: seed.headerLogo || null,
-        headerWeather: seed.headerWeather || { temp: null, weatherCode: null, icon: 'cloudy' },
-        headerCurrentDate: seed.headerCurrentDate || '',
-      }
-    : null;
 
   const shareBaseUrl = currentPageUrl || 'https://shottyodharaprotidin.com';
   const shareTitle = t.recentArticles;
@@ -244,7 +229,23 @@ export default function Home({ initialData = null }) {
   };
 
   const displayFeatured = featured;
-  const displayPopular = popular;
+  const displayPopular = (() => {
+    const primary = Array.isArray(popular) ? popular : [];
+    if (primary.length >= 2) return primary;
+
+    const fallback = Array.isArray(latest) ? latest : [];
+    const merged = [...primary, ...fallback].filter((article, index, list) => {
+      const d = article?.attributes || article || {};
+      const key = article?.id || d.slug || d.documentId || `idx-${index}`;
+      return list.findIndex((candidate) => {
+        const cd = candidate?.attributes || candidate || {};
+        const cKey = candidate?.id || cd.slug || cd.documentId;
+        return cKey === key;
+      }) === index;
+    });
+
+    return merged.slice(0, 5);
+  })();
   const displayTrending = trending;
   const displayLatest = latest;
   const displayTopNews = topNews;
@@ -272,7 +273,6 @@ export default function Home({ initialData = null }) {
     setEditorPicks(seed.editorPicks || []);
     setLatestReviews(seed.latestReviews || []);
     setAdsData(seed.adsData || null);
-    setCategories(seed.categories || []);
     setTrendingCategories(seed.trendingCategories || []);
     setSidebarCategories(seed.sidebarCategories || []);
     setWeatherData(seed.weatherData || {
@@ -385,8 +385,6 @@ export default function Home({ initialData = null }) {
         const techPromise         = getTechInnovationArticles(4, locale);
         const editorPromise       = getEditorChoiceArticles(5, locale);
         const recentPostPromise   = getRecentPostArticles(20, locale);
-        const reviewPromise       = getRecentReviewArticles(7, locale);
-        const categoriesPromise   = getCategories(20, locale);
         const trendingCatPromise  = getTrendingCategories(20, locale);
         const sidebarCatPromise   = getSidebarCategories(20, locale);
         const adsPromise          = getAdsManagement();
@@ -408,7 +406,7 @@ export default function Home({ initialData = null }) {
         const weatherLon = resolvedLocation?.lon;
         const detectedLocationLabel = resolvedLocation?.fallbackLabel || '';
 
-        const [youtubeRes, pollRes, globalRes, tagsRes, topNewsRes, mostReadRes, popularNewsRes, techRes, editorRes, recentPostRes, reviewRes, categoriesRes, trendingRes, sidebarRes, adsRes, weatherRes] = await Promise.allSettled([
+        const [youtubeRes, pollRes, globalRes, tagsRes, topNewsRes, mostReadRes, popularNewsRes, techRes, editorRes, recentPostRes, trendingRes, sidebarRes, adsRes, weatherRes] = await Promise.allSettled([
           youtubePromise,
           pollPromise,
           globalPromise,
@@ -419,8 +417,6 @@ export default function Home({ initialData = null }) {
           techPromise,
           editorPromise,
           recentPostPromise,
-          reviewPromise,
-          categoriesPromise,
           trendingCatPromise,
           sidebarCatPromise,
           adsPromise,
@@ -438,12 +434,11 @@ export default function Home({ initialData = null }) {
         setPopularNews(popularNewsRes.value?.data || []);
         setTechArticles(techRes.value?.data || []);
         setEditorPicks(editorRes.value?.data || []);
+        setLatestReviews(selectRecentReviewArticles(latestRes.value?.data || [], 7));
         setLatest(prev => {
           const recentPostData = recentPostRes.value?.data;
           return (recentPostData && recentPostData.length > 0) ? recentPostData : prev;
         });
-        setLatestReviews(reviewRes.value?.data || []);
-        setCategories(categoriesRes.value?.data || []);
         setTrendingCategories(trendingRes.value?.data || []);
         setSidebarCategories(sidebarRes.value?.data || []);
         const adsRaw = adsRes.value?.data || adsRes.value || null;
@@ -469,7 +464,7 @@ export default function Home({ initialData = null }) {
               popularNews: popularNewsRes.value?.data || [],
               techArticles: techRes.value?.data || [],
               editorPicks: editorRes.value?.data || [],
-              latestReviews: reviewRes.value?.data || [],
+              latestReviews: selectRecentReviewArticles(latestRes.value?.data || [], 7),
               totalPages: latestRes.value?.meta?.pagination?.pageCount || 1,
               cachedAt: Date.now(),
             }));
@@ -488,7 +483,7 @@ export default function Home({ initialData = null }) {
   useBackgroundImageLoader();
 
   return (
-    <Layout globalSettings={globalSettings} initialHeaderData={initialHeaderData}>
+    <Layout globalSettings={globalSettings}>
       {/* *** START PAGE MAIN CONTENT *** */}
       <main className="page_main_wrapper">
         {/* START NEWSTRICKER */}

@@ -71,8 +71,10 @@ export async function GET(request) {
     const realSlug = article.attributes?.slug || article.slug;
     if (realSlug) {
       console.log('Article preview →', realSlug);
-      draftMode().enable();
-      cookies().set('NEXT_LOCALE', appLocale, { path: '/' });
+      const draft = await draftMode();
+      draft.enable();
+      const cookieStore = await cookies();
+      cookieStore.set('NEXT_LOCALE', appLocale, { path: '/' });
       redirect(`/article/${realSlug}?locale=${appLocale}`);
     }
   }

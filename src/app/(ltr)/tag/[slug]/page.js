@@ -288,7 +288,7 @@ const TagPage = () => {
     return (
         <Layout hideMiddleHeader={true} globalSettings={globalSettings}>
             {/* START PAGE TITLE */}
-            <div className="page-title">
+            <div className="page-title article-page-title">
                 <div className="container">
                     <div className="align-items-center row">
                         <div className="col">
@@ -414,15 +414,16 @@ const TagPage = () => {
                         <div className="col-sm-5 col-md-4 col-p rightSidebar">
                             <StickyBox>
                                 {/* SOCIAL COUNTER */}
-                                <div className="align-items-center d-flex fs-6 justify-content-center mb-1 text-center social-counter-total">
-                                    <i className="fa-solid fa-heart text-primary me-1" /> {t.join}{" "}
-                                    <span className="fw-bold mx-1">
-                                        {globalSettings?.socialTotalFollowers || '0'}
-                                    </span> {t.followers}
-                                </div>
-                                {/* SOCIAL ICONS */}
-                                <div className="social-media-inner mb-2">
-                                    <ul className="g-1 row social-media">
+                                <div className="article-social-card mb-2">
+                                    <div className="align-items-center d-flex fs-6 justify-content-center mb-1 text-center social-counter-total">
+                                        <i className="fa-solid fa-heart text-primary me-1" /> {t.join}{" "}
+                                        <span className="fw-bold mx-1">
+                                            {globalSettings?.socialTotalFollowers || '0'}
+                                        </span> {t.followers}
+                                    </div>
+                                    {/* SOCIAL ICONS */}
+                                    <div className="social-media-inner mb-0">
+                                        <ul className="g-1 row social-media">
                                         <li className="col-4">
                                             <a href={globalSettings?.socialRssUrl || '#'} className="rss" target="_blank" rel="noopener noreferrer">
                                                 <i className="fas fa-rss" />
@@ -465,7 +466,8 @@ const TagPage = () => {
                                                 <p>{t.followers}</p>
                                             </a>
                                         </li>
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
                                 {/* NAV TABS */}
                                 <div className="tabs-wrapper">

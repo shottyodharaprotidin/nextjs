@@ -161,12 +161,13 @@ const ArticleSidebar = ({ mostViewed, popularNews, globalSettings: rawGlobalSett
       {/* END OF /. ADVERTISEMENT */}
 
       {/* SOCIAL COUNTER */}
-      <div className="align-items-center d-flex fs-6 justify-content-center mb-1 mt-2 text-center social-counter-total">
-        <i className="fa-solid fa-heart text-primary me-1" /> {t('joinFollowers')}{" "}
-        <span className="fw-bold mx-1">{globalSettings?.socialTotalFollowers || '0'}</span> {t('followers')}
-      </div>
-      <div className="social-media-inner social-media-inner--compact mb-2">
-        <ul className="g-1 row social-media">
+      <div className="article-social-card mb-2 mt-2">
+        <div className="align-items-center d-flex fs-6 justify-content-center mb-1 text-center social-counter-total">
+          <i className="fa-solid fa-heart text-primary me-1" /> {t('joinFollowers')} {" "}
+          <span className="fw-bold mx-1">{globalSettings?.socialTotalFollowers || '0'}</span> {t('followers')}
+        </div>
+        <div className="social-media-inner social-media-inner--compact mb-0">
+          <ul className="g-1 row social-media">
           <li className="col-4">
             <Link href={globalSettings?.socialRssUrl || '#'} className="rss" target="_blank">
               <i className="fas fa-rss" />
@@ -209,7 +210,8 @@ const ArticleSidebar = ({ mostViewed, popularNews, globalSettings: rawGlobalSett
               <p className="social-text follower-label-text">{t('followers')}</p>
             </Link>
           </li>
-        </ul>
+          </ul>
+        </div>
       </div>
       {/* END OF /. SOCIAL COUNTER */}
 

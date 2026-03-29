@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/app/theme-providers';
 const StyleSelector = () => {
     const [mounted, setMounted] = useState(false)
     const { theme, setTheme } = useTheme()
