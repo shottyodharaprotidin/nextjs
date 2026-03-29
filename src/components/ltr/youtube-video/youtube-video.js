@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getStrapiMedia } from "@/lib/strapi";
 import { useLanguage } from '@/lib/LanguageContext';
 
@@ -68,7 +68,12 @@ const dummyVideos = [
 const YoutubeVideo = ({ data = [], isLoading = false }) => {
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(0);
-  const [autoplay, setAutoplay] = useState(0);
+  const [volume, setVolume] = useState(80);
+  const [isMuted, setIsMuted] = useState(false);
+  const playerRef = useRef(null);
+  const playerContainerRef = useRef(null);
+  const apiReadyRef = useRef(false);
+  const pendingVideoRef = useRef(null);
   const { locale } = useLanguage();
   const t = dictionary[locale] || dictionary.bn;
 
@@ -106,6 +111,55 @@ const YoutubeVideo = ({ data = [], isLoading = false }) => {
     },
   ];
 
+  // Load YouTube IFrame API once
+  useEffect(() => {
+    const existingReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (existingReady) existingReady();
+      apiReadyRef.current = true;
+      if (pendingVideoRef.current) {
+        initPlayer(pendingVideoRef.current);
+        pendingVideoRef.current = null;
+      }
+    };
+    if (window.YT && window.YT.Player) {
+      apiReadyRef.current = true;
+    } else if (!document.getElementById('yt-iframe-api')) {
+      const script = document.createElement('script');
+      script.id = 'yt-iframe-api';
+      script.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(script);
+    }
+    return () => {
+      if (playerRef.current) {
+        try { playerRef.current.destroy(); } catch (_) {}
+        playerRef.current = null;
+      }
+    };
+  }, []);
+
+  const initPlayer = useCallback((videoId) => {
+    if (!playerContainerRef.current) return;
+    if (playerRef.current) {
+      try { playerRef.current.destroy(); } catch (_) {}
+      playerRef.current = null;
+    }
+    // Clear inner HTML so YT.Player gets a fresh div
+    playerContainerRef.current.innerHTML = '';
+    const div = document.createElement('div');
+    playerContainerRef.current.appendChild(div);
+    playerRef.current = new window.YT.Player(div, {
+      videoId,
+      playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
+      events: {
+        onReady: (e) => {
+          e.target.setVolume(volume);
+          if (isMuted) e.target.mute();
+        },
+      },
+    });
+  }, [volume, isMuted]);
+
   useEffect(() => {
     if (isLoading) {
       setVideos(dummyVideos);
@@ -131,9 +185,65 @@ const YoutubeVideo = ({ data = [], isLoading = false }) => {
     }
   }, [data, isLoading]);
 
+  // Auto-init first video once both videos and API are ready
+  useEffect(() => {
+    if (!videos.length || isLoading) return;
+    const firstId = videos[0]?.id;
+    if (!firstId) return;
+    if (apiReadyRef.current && window.YT?.Player) {
+      if (!playerRef.current) initPlayer(firstId);
+    } else {
+      pendingVideoRef.current = firstId;
+    }
+  }, [videos, isLoading]);
+
+  // Auto-init first video once both videos and API are ready
+  useEffect(() => {
+    if (!videos.length || isLoading) return;
+    const firstId = videos[0]?.id;
+    if (!firstId) return;
+    if (apiReadyRef.current && window.YT?.Player) {
+      if (!playerRef.current) initPlayer(firstId);
+    } else {
+      pendingVideoRef.current = firstId;
+    }
+  }, [videos, isLoading]);
+
   const handleThumbnailClick = (index) => {
     setSelectedVideo(index);
-    setAutoplay(1);
+    const vid = videos.slice(0, 5)[index];
+    if (!vid) return;
+    if (apiReadyRef.current && window.YT?.Player) {
+      if (playerRef.current?.loadVideoById) {
+        playerRef.current.loadVideoById(vid.id);
+      } else {
+        initPlayer(vid.id);
+      }
+    } else {
+      pendingVideoRef.current = vid.id;
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const val = Number(e.target.value);
+    setVolume(val);
+    if (playerRef.current?.setVolume) {
+      playerRef.current.setVolume(val);
+      if (val === 0) { playerRef.current.mute(); setIsMuted(true); }
+      else { playerRef.current.unMute(); setIsMuted(false); }
+    }
+  };
+
+  const toggleMute = () => {
+    if (!playerRef.current) return;
+    if (isMuted) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(volume || 80);
+      setIsMuted(false);
+    } else {
+      playerRef.current.mute();
+      setIsMuted(true);
+    }
   };
   
   if (!isLoading && data.length === 0) return null; // Hide if no real data
@@ -183,21 +293,32 @@ const YoutubeVideo = ({ data = [], isLoading = false }) => {
           </div>
         </div>
         <div className="RYPP-video">
-            {displayVideos[selectedVideo] && (
-            <iframe
-              key={`RYPP-vp-${selectedVideo}-${displayVideos[selectedVideo].id}-${autoplay}`}
-              className="RYPP-video-player"
-              style={{ display: 'block' }}
-              id={`RYPP-vp-da4e5dd6-${selectedVideo}`}
-              name={`RYPP-vp-da4e5dd6-${selectedVideo}`}
-              frameBorder="0"
-              allowFullScreen
-              title="YouTube Video Player"
-              width="640"
-              height="360"
-              src={`https://www.youtube.com/embed/${displayVideos[selectedVideo].id}?autoplay=${autoplay}`}
-            ></iframe>
-            )}
+          <div ref={playerContainerRef} className="RYPP-video-player-container" />
+          <div className="yt-volume-bar">
+            <button
+              type="button"
+              className="yt-mute-btn"
+              onClick={toggleMute}
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted || volume === 0
+                ? <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                : volume < 50
+                  ? <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/></svg>
+                  : <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+              }
+            </button>
+            <input
+              type="range"
+              className="yt-volume-slider"
+              min="0"
+              max="100"
+              value={isMuted ? 0 : volume}
+              onChange={handleVolumeChange}
+              aria-label="Volume"
+            />
+            <span className="yt-volume-value">{isMuted ? 0 : volume}%</span>
+          </div>
         </div>
       </div>
     </div>
