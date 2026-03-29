@@ -87,7 +87,7 @@ export async function getArticleByDocumentIdPreview(documentId, locale) {
 }
 
 
-export async function getLatestArticles(page = 1, limit = 5, locale = 'bn') {
+export async function getLatestArticles(page = 1, limit = 5, locale = 'bn', options = {}) {
   const strapiLocale = getStrapiLocale(locale);
   const queryParams = new URLSearchParams({
     'populate[0]': 'cover',
@@ -99,7 +99,7 @@ export async function getLatestArticles(page = 1, limit = 5, locale = 'bn') {
     'locale': strapiLocale,
   });
 
-  return await fetchAPI(`/articles?${queryParams}`);
+  return await fetchAPI(`/articles?${queryParams}`, options);
 }
 
 export async function getRelatedArticles(categorySlug, currentArticleId, limit = 4, locale = 'bn') {
@@ -158,12 +158,15 @@ export function selectRecentReviewArticles(articles = [], limit = 7) {
     return normalizedArticles.slice(0, limit);
   }
 
-  return normalizedArticles
+  const filtered = normalizedArticles
     .filter((article) => {
       const articleData = article?.attributes || article || {};
       return articleData.isRecentReview;
     })
     .slice(0, limit);
+
+  // If the field exists but no items are flagged true, don't leave the panel empty.
+  return filtered.length > 0 ? filtered : normalizedArticles.slice(0, limit);
 }
 
 export async function getRecentReviewArticles(limit = 7, locale = 'bn') {

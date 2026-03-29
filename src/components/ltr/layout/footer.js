@@ -191,7 +191,7 @@ const Footer = ({ hideMiddleHeader = false }) => {
         // Fallback to 'bn' if 'bn-BD' recent posts are empty.
         if (recentPostsData.length === 0 && strapiLocale === 'bn-BD') {
           try {
-            const fallbackRes = await getLatestArticles(1, 3, 'bn');
+            const fallbackRes = await getLatestArticles(1, 3, 'bn', { silent: true });
             recentPostsData = fallbackRes?.data || [];
           } catch {
             recentPostsData = [];

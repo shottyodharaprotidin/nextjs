@@ -14,7 +14,7 @@ export async function getYoutubeVideos(locale = 'bn') {
   });
 
   try {
-    const data = await fetchAPI(`/latest-ytvideo-news?${queryParams}`);
+    const data = await fetchAPI(`/latest-ytvideo-news?${queryParams}`, { silent: true });
     return data;
   } catch {
     return { data: [] };
@@ -37,7 +37,8 @@ export async function getActivePoll(locale = 'bn') {
 
   try {
     const data = await fetchAPI(`/polls?${queryParams}`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      silent: true,
     });
     return data;
   } catch {
