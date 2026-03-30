@@ -485,7 +485,7 @@ export default function Home({ initialData = null }) {
   return (
     <Layout globalSettings={globalSettings}>
       {/* *** START PAGE MAIN CONTENT *** */}
-      <main className="page_main_wrapper">
+      <main className="page_main_wrapper home-nine">
         {/* START NEWSTRICKER */}
         <NewsTicker data={displayTrending} isLoading={false} />
         {/*  END OF /. NEWSTRICKER */}

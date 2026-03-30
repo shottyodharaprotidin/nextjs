@@ -688,7 +688,26 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
     }));
 
     const desktopMenuItems = normalizedMenuItems.length > 0 ? normalizedMenuItems : fallbackMenuItems;
-    const mobileNavItems = normalizedMobileMenuItems.length > 0 ? normalizedMobileMenuItems : desktopMenuItems;
+
+    // Build title→URL lookup from desktop menu and categories to resolve '#' URLs in mobileMenu
+    const urlByTitle = {};
+    normalizedMenuItems.forEach((item) => {
+        const t = (item?.title || '').trim().toLowerCase();
+        const u = item?.url || item?.slug;
+        if (t && u && u !== '#') urlByTitle[t] = u;
+    });
+    categoryTree.forEach((cat) => {
+        const t = (cat?.name || '').trim().toLowerCase();
+        if (t && cat?.slug) urlByTitle[t] = `/${cat.slug}`;
+    });
+
+    const resolvedMobileMenuItems = normalizedMobileMenuItems.map((item) => {
+        if (item?.url && item.url !== '#') return item;
+        const resolved = urlByTitle[(item?.title || '').trim().toLowerCase()];
+        return resolved ? { ...item, url: resolved } : item;
+    });
+
+    const mobileNavItems = resolvedMobileMenuItems.length > 0 ? resolvedMobileMenuItems : desktopMenuItems;
 
     const normalizeMenuUrl = (slug) => {
         const normalizedSlug = normalizeMenuPath(slug);
@@ -1065,7 +1084,7 @@ const Header = ({ hideMiddleHeader = false, globalSettings, initialHeaderData = 
                             </button>
                         </div>
                         {mobileQuickMenuItems.length > 0 && (
-                            <div className="d-lg-none mobile-quick-menu" aria-label="Mobile quick menu">
+                            <div className="d-lg-none mobile-quick-menu" aria-label="Mobile quick menu" suppressHydrationWarning>
                                 <div className="mobile-quick-menu__bar">
                                     {mobileQuickMenuItems.map((item) => (
                                         item.type === 'dropdown' ? (

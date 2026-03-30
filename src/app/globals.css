@@ -1065,7 +1065,7 @@ article:hover figure a:before,
         min-height: 86px !important;
         max-height: none !important;
         padding-top: 2px !important;
-        padding-bottom: 4px !important;
+        padding-bottom: 0 !important;
         display: flex;
         align-items: flex-start;
     }
@@ -1113,6 +1113,7 @@ article:hover figure a:before,
         line-height: 1.2;
         font-size: 12px;
         margin-top: 0;
+        padding-bottom: 4px;
     }
 
     .date-text-mobile.date-text-bn {
@@ -1122,7 +1123,7 @@ article:hover figure a:before,
     .header-locale-en .custom-navbar {
         min-height: 90px !important;
         padding-top: 4px !important;
-        padding-bottom: 6px !important;
+        padding-bottom: 0 !important;
     }
 
     .header-locale-en .mobile-header-brand {
@@ -1158,8 +1159,9 @@ article:hover figure a:before,
     }
 
     .mobile-quick-menu {
-        width: 100%;
-        margin-top: 4px;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-top: 0;
         border-top: 1px solid #e7e7e7;
         border-bottom: 1px solid #e7e7e7;
         position: relative;
@@ -1188,10 +1190,10 @@ article:hover figure a:before,
         align-items: center;
         justify-content: center;
         flex: 0 0 auto;
-        min-height: 34px;
-        padding: 0 10px;
+        min-height: 28px;
+        padding: 0 8px;
         color: #2f2e41;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
         border-bottom: 2px solid transparent;
     }
@@ -1203,7 +1205,7 @@ article:hover figure a:before,
     }
 
     .locale-bn .mobile-quick-menu__link {
-        font-size: 17px;
+        font-size: 15px;
         font-weight: 600;
     }
 
@@ -5956,6 +5958,11 @@ abbr[title] {
         padding: 10px 10px 6px;
     }
 
+    .article-page-wrapper .post_details_block h2 {
+        font-size: 28px !important;
+        line-height: 1.35 !important;
+    }
+
     .article-page-wrapper .post_details_block p,
     .article-page-wrapper .post_details_block .article-p {
         margin-bottom: 16px;
@@ -7813,7 +7820,7 @@ blockquote.no-sign p {
 /*top ber*/
 
 [data-theme=skin-dark] .header-top {
-    background: #eb0254;
+    background: #1a1b22;
 }
 
 [data-theme=skin-dark] .header-social>ul>li>a {
@@ -7850,8 +7857,9 @@ blockquote.no-sign p {
 }
 
 [data-theme=skin-dark] .mobile-quick-menu {
-    border-top-color: rgba(255, 255, 255, 0.12);
-    border-bottom-color: rgba(255, 255, 255, 0.12);
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    background: #222327;
 }
 
 [data-theme=skin-dark] .mobile-quick-menu__link {

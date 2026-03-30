@@ -211,7 +211,7 @@ const carouselOptions = {
     autoplayTimeout: 4000,
     autoplayHoverPause: true,
     nav: true,
-    navText: ["<i class='ti ti ti-angle-left'></i>", "<i class='ti ti ti-angle-right'></i>"],
+    navText: ["<i class='ti ti-angle-left'></i>", "<i class='ti ti-angle-right'></i>"],
 };
 
 const TagPage = () => {

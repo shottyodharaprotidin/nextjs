@@ -19,6 +19,7 @@ const HomeCenterSlider = ({ data = [], isLoading = false }) => {
   const items = data.slice(0, 5);
 
   const [current, setCurrent] = useState(0);
+  const [isHydrated, setIsHydrated] = useState(false);
   const hoveredRef = useRef(false);
   const timerRef = useRef(null);
 
@@ -28,6 +29,7 @@ const HomeCenterSlider = ({ data = [], isLoading = false }) => {
 
   // Reset index when data changes
   useEffect(() => { setCurrent(0); }, [items.length]);
+  useEffect(() => { setIsHydrated(true); }, []);
 
   // Autoplay
   useEffect(() => {
@@ -85,7 +87,7 @@ const HomeCenterSlider = ({ data = [], isLoading = false }) => {
               style={{
                 position: 'absolute', inset: 0,
                 opacity: isActive ? 1 : 0,
-                transition: 'opacity 0.6s ease',
+                transition: isHydrated ? 'opacity 0.6s ease' : 'none',
                 pointerEvents: isActive ? 'auto' : 'none',
                 zIndex: isActive ? 1 : 0,
               }}
@@ -121,15 +123,6 @@ const HomeCenterSlider = ({ data = [], isLoading = false }) => {
             </div>
           );
         })}
-      </div>
-
-      <div className="owl-nav">
-        <button className="owl-prev" onClick={() => goTo(current - 1)} aria-label="Previous">
-          <i className="ti ti-angle-left" />
-        </button>
-        <button className="owl-next" onClick={() => goTo(current + 1)} aria-label="Next">
-          <i className="ti ti-angle-right" />
-        </button>
       </div>
 
       <div className="owl-dots">

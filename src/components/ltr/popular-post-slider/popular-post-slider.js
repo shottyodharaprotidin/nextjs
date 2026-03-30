@@ -23,8 +23,8 @@ const PopularPostSlider = () => {
         animateIn: 'animate__fadeIn',
         nav: true,
         navText: [
-            "<i class='ti ti ti-angle-left'></i>",
-            "<i class='ti ti ti-angle-right'></i>"
+            "<i class='ti ti-angle-left'></i>",
+            "<i class='ti ti-angle-right'></i>"
         ]
     }
     return (

@@ -1,4 +1,4 @@
-import { getArticleBySlug, getArticleBySlugPreview, getMostViewedArticles, getPopularArticles } from '@/services/articleService';
+﻿import { getArticleBySlug, getArticleBySlugPreview, getMostViewedArticles, getPopularArticles } from '@/services/articleService';
 import { cookies, draftMode } from 'next/headers';
 import { getGlobalSettings, getAdsManagement } from '@/services/globalService';
 import { getStrapiMedia } from '@/lib/strapi';
@@ -66,7 +66,7 @@ const ArticleDetailPage = async ({ params, searchParams }) => {
   let globalSettingsResponse = { data: null };
   let adsResponse = { data: null };
 
-  // Deteksi Draft Mode
+  // Detect draft mode
   const { isEnabled } = await draftMode();
 
   // When in draft mode, use the locale from URL params (e.g. from preview redirect)
@@ -98,9 +98,6 @@ const ArticleDetailPage = async ({ params, searchParams }) => {
   }
 
   return (
-    <>
-    {isEnabled && <PreviewBanner slug={slug} />}
-
     <ClientArticleDetail 
       article={articleData}
       mostViewed={mostViewedResponse?.data || []}
@@ -109,36 +106,8 @@ const ArticleDetailPage = async ({ params, searchParams }) => {
       adsData={adsResponse?.data}
       locale={locale}
     />
-    </>
   );
 };
-
-/* Preview Banner Component */
-function PreviewBanner({ slug }) {
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      background: '#f59e0b',
-      color: '#000',
-      padding: '12px',
-      textAlign: 'center',
-      zIndex: 9999,
-      fontWeight: 'bold',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    }}>
-      ⚠️ Preview Mode — This article is not yet published.{' '}
-      <a 
-        href={`/api/disable-preview?slug=${slug}`}
-        style={{ textDecoration: 'underline', marginLeft: '10px' }}
-      >
-        Exit Preview
-      </a>
-    </div>
-  );
-}
 
 
 export default ArticleDetailPage;
